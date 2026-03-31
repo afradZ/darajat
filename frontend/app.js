@@ -9,25 +9,23 @@ const formationsData = {
     }
 };
 
-let formationActuelle = "";
+let categorieActuelle = ""; // Enregistre si l'utilisateur a cliqué sur 'edu' ou 'pro'
 
 function showOverlay(id) {
     const overlay = document.getElementById(id);
     overlay.style.display = 'flex';
-    // Petit délai pour permettre à la transition CSS de se déclencher
     setTimeout(() => overlay.classList.add('active'), 10);
 }
 
 function hideOverlay(id) {
     const overlay = document.getElementById(id);
     overlay.classList.remove('active');
-    // Attendre la fin de l'animation pour cacher le display
     setTimeout(() => overlay.style.display = 'none', 300);
 }
 
 function ouvrirModalDetails(type) {
-    formationActuelle = formationsData[type].titre;
-    document.getElementById('modal-title').innerText = formationActuelle;
+    categorieActuelle = type; // Sauvegarde la catégorie cliquée
+    document.getElementById('modal-title').innerText = formationsData[type].titre;
     
     const ul = document.getElementById('modal-list');
     ul.innerHTML = "";
@@ -40,10 +38,23 @@ function ouvrirModalDetails(type) {
     showOverlay('modal-details');
 }
 
+// Construit le menu déroulant dynamiquement en fonction de la catégorie
 function ouvrirModalInscription() {
     hideOverlay('modal-details');
-    document.getElementById('formationSelect').value = formationActuelle;
-    setTimeout(() => showOverlay('modal-inscription'), 300); // Wait for details modal to fade out
+    
+    const select = document.getElementById('formationSelect');
+    // Réinitialise le menu avec l'option par défaut
+    select.innerHTML = '<option value="" disabled selected>Choisir une formation spécifique...</option>';
+    
+    // Ajoute uniquement les cours de la catégorie sélectionnée
+    formationsData[categorieActuelle].points.forEach(point => {
+        let option = document.createElement('option');
+        option.value = point;
+        option.textContent = point;
+        select.appendChild(option);
+    });
+
+    setTimeout(() => showOverlay('modal-inscription'), 300); 
 }
 
 function fermerModal(modalId, event) {
