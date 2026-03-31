@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre Darajat | Formation et Compétences</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav>
+    <a href="#home">Accueil</a>
+    <a href="#nous">À propos</a>
+    <a href="#formations">Formations</a>
+    <a href="#verification">Vérification</a>
+    <a href="#contact">Contact</a>
+</nav>
+
+<section id="home" class="hero">
+    <div class="hero-content">
+        <h1>Centre Darajat</h1>
+        <h2>Développez vos compétences, façonnez votre avenir.</h2>
+    </div>
+</section>
+
+<section id="nous">
+    <div class="about-container">
+        <div class="about-text">
+            <h2 class="section-title" style="text-align: left;">Notre Expertise</h2>
+            <p>Notre structure s’appuie sur une équipe homogène, pluridisciplinaire et hautement complémentaire, réunissant des professionnels expérimentés, des experts métiers, des formateurs et des spécialistes en sciences humaines.</p>
+            <p>Cette synergie de compétences nous permet d’adopter une approche globale et innovante, fondée sur une compréhension approfondie des enjeux organisationnels et des besoins spécifiques de nos publics.</p>
+            <p>Engagés dans une démarche d’amélioration continue, nous mettons un point d’honneur à garantir des prestations de haute qualité.</p>
+        </div>
+        <div class="about-image">
+            <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d" alt="Équipe">
+        </div>
+    </div>
+</section>
+
+<section id="formations" class="bg-gray">
+    <h2 class="section-title">Nos formations</h2>
+    <div class="cards">
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7" alt="Éducatives">
+            <div class="card-content">
+                <div class="card-icon"><i class="fa-solid fa-book-open-reader"></i></div>
+                <h3>Formations éducatives</h3>
+                <p>Développement cognitif, pédagogie moderne et accompagnement scolaire de haut niveau.</p>
+                <button class="btn" onclick="ouvrirModalDetails('edu')">
+                    Voir le programme <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692" alt="Professionnelles">
+            <div class="card-content">
+                <div class="card-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                <h3>Formations professionnelles</h3>
+                <p>Acquérez les compétences métiers modernes les plus demandées sur le marché du travail.</p>
+                <button class="btn" onclick="ouvrirModalDetails('pro')">
+                    Voir le programme <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="verification">
+    <h2 class="section-title">Vérification des attestations</h2>
+    <div class="verification-wrapper">
+        <div class="input-group">
+            <i class="fa-solid fa-certificate"></i>
+            <input type="text" id="codeAttestation" placeholder="Entrez le numéro d'attestation (Ex: DAR-2026-001)">
+        </div>
+        <button class="btn" style="width: 100%;" onclick="verifierAttestation()">
+            <i class="fa-solid fa-magnifying-glass"></i> Vérifier l'authenticité
+        </button>
+        <div id="resultat"></div>
+    </div>
+</section>
+
+<section id="contact" class="bg-gray">
+    <h2 class="section-title">Contactez-nous</h2>
+    <div class="form-container">
+        <form onsubmit="event.preventDefault(); alert('Message envoyé !');">
+            <div class="input-group">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" placeholder="Votre nom complet" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-regular fa-envelope"></i>
+                <input type="email" placeholder="Votre adresse email" required>
+            </div>
+            <div class="input-group">
+                <textarea rows="5" placeholder="Comment pouvons-nous vous aider ?" required></textarea>
+            </div>
+            <button type="submit" class="btn" style="width: 100%; margin-bottom: 15px;">
+                <i class="fa-regular fa-paper-plane"></i> Envoyer le message
+            </button>
+            <a href="https://wa.me/212714899090" target="_blank" class="btn btn-green" style="width: 100%;">
+                <i class="fa-brands fa-whatsapp"></i> Discuter sur WhatsApp
+            </a>
+        </form>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 Centre Darajat. Tous droits réservés.</p>
+</footer>
+
+<div id="modal-details" class="modal-overlay" onclick="fermerModal('modal-details', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="fermerModal('modal-details', event)"><i class="fa-solid fa-xmark"></i></span>
+        <div class="card-icon" style="margin: 0 auto 20px;"><i class="fa-solid fa-list-check"></i></div>
+        <h3 id="modal-title" style="color: var(--primary); font-size: 1.5rem;">Titre</h3>
+        <ul id="modal-list"></ul>
+        <button class="btn btn-green" style="width: 100%;" onclick="ouvrirModalInscription()">
+            <i class="fa-solid fa-user-plus"></i> S'inscrire maintenant
+        </button>
+    </div>
+</div>
+
+<div id="modal-inscription" class="modal-overlay" onclick="fermerModal('modal-inscription', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="fermerModal('modal-inscription', event)"><i class="fa-solid fa-xmark"></i></span>
+        <h3 style="color: var(--primary); margin-bottom: 25px; font-size: 1.5rem;">Demande d'inscription</h3>
+        
+        <form onsubmit="soumettreInscription(event)">
+            <div class="input-group">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" placeholder="Nom complet" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-regular fa-envelope"></i>
+                <input type="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-phone"></i>
+                <input type="tel" placeholder="Téléphone" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <select id="formationSelect" required>
+                    <option value="" disabled>Choisir une formation</option>
+                    <option value="Formations éducatives">Formations éducatives</option>
+                    <option value="Formations professionnelles">Formations professionnelles</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-green" style="width: 100%;">
+                <i class="fa-solid fa-check"></i> Confirmer l'inscription
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
