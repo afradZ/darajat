@@ -89,17 +89,17 @@
 <section id="contact" class="bg-gray">
     <h2 class="section-title">Contactez-nous</h2>
     <div class="form-container">
-        <form onsubmit="event.preventDefault(); alert('Message envoyé !');">
+        <form class="contact-form" onsubmit="envoyerMessage(event)">
             <div class="input-group">
                 <i class="fa-regular fa-user"></i>
-                <input type="text" placeholder="Votre nom complet" required>
+                <input type="text" id="contactNom" placeholder="Votre nom complet" required>
             </div>
             <div class="input-group">
                 <i class="fa-regular fa-envelope"></i>
-                <input type="email" placeholder="Votre adresse email" required>
+                <input type="email" id="contactEmail" placeholder="Votre adresse email" required>
             </div>
             <div class="input-group">
-                <textarea rows="5" placeholder="Comment pouvons-nous vous aider ?" required></textarea>
+                <textarea id="contactMessage" rows="5" placeholder="Comment pouvons-nous vous aider ?" required></textarea>
             </div>
             <button type="submit" class="btn" style="width: 100%; margin-bottom: 15px;">
                 <i class="fa-regular fa-paper-plane"></i> Envoyer le message
