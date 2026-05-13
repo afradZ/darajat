@@ -16,9 +16,8 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
-// ==========================================
-// 2. API ENDPOINTS
-// ==========================================
+
+// 2. API ENDPOINTS // 
 
 // Endpoint A: Handle Inscription
 app.post('/api/inscription', async (req, res) => {
@@ -84,6 +83,72 @@ app.post('/api/contact', async (req, res) => {
     } catch (err) {
         console.error(" ERREUR SAUVEGARDE MESSAGE :", err); // <-- Better error tracing
         res.status(500).json({ success: false, message: "Erreur lors de l'envoi." });
+    }
+});
+
+// Endpoint D: Récupérer tous les messages (Admin)
+app.get('/api/admin/messages', async (req, res) => {
+    try {
+        // ORDER BY id DESC puts the newest messages at the top!
+        const result = await pool.query('SELECT * FROM messages_contact ORDER BY id DESC');
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        console.error("🚨 Erreur lecture messages:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur" });
+    }
+});
+
+// Endpoint E: Récupérer toutes les inscriptions (Admin)
+app.get('/api/admin/inscriptions', async (req, res) => {
+    try {
+        // Replace 'inscriptions' with your actual table name if it is different
+        const result = await pool.query('SELECT * FROM inscriptions ORDER BY id DESC');
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        console.error("🚨 Erreur lecture inscriptions:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur" });
+    }
+});
+
+// Endpoint F: Marquer un message comme lu
+app.put('/api/admin/messages/:id/lu', async (req, res) => {
+    try {
+        await pool.query("UPDATE messages_contact SET statut = 'lu' WHERE id = $1", [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// Endpoint G: Marquer une inscription comme lue
+app.put('/api/admin/inscriptions/:id/lu', async (req, res) => {
+    try {
+        await pool.query("UPDATE inscriptions SET statut = 'lu' WHERE id = $1", [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// Endpoint H: Supprimer un message
+app.delete('/api/admin/messages/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM messages_contact WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: "Message supprimé." });
+    } catch (err) {
+        console.error("🚨 Erreur suppression message:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur" });
+    }
+});
+
+// Endpoint I: Supprimer une inscription
+app.delete('/api/admin/inscriptions/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM inscriptions WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: "Inscription supprimée." });
+    } catch (err) {
+        console.error("🚨 Erreur suppression inscription:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur" });
     }
 });
 
