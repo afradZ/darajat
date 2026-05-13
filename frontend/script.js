@@ -59,7 +59,7 @@ function fermerModal(modalId, event) {
     hideOverlay(modalId);
 }
 
-// === CONNECTED TO BACKEND: SENDS DATA TO POSTGRESQL ===
+// CONNECTED TO BACKEND: SENDS DATA TO POSTGRESQL 
 async function soumettreInscription(event) {
     event.preventDefault(); 
     
@@ -93,7 +93,7 @@ async function soumettreInscription(event) {
     }
 }
 
-// === CONNECTED TO BACKEND: CHECKS POSTGRESQL FOR CERTIFICATES ===
+// CONNECTED TO BACKEND: CHECKS POSTGRESQL FOR CERTIFICATES 
 async function verifierAttestation() {
     let codeInput = document.getElementById("codeAttestation").value.trim();
     let resultat = document.getElementById("resultat");
@@ -131,10 +131,9 @@ async function verifierAttestation() {
     }
 }
 
-// === CONNECTED TO BACKEND: SENDS CONTACT MESSAGES ===
+// CONNECTED TO BACKEND: SENDS CONTACT MESSAGES
 async function envoyerMessage(event) {
     event.preventDefault(); // Empêche la page de se recharger
-    console.log("🕵️‍♂️ BOUTON CLIQUÉ ! Démarrage de l'envoi...");
     
     const formData = {
         nom: document.getElementById('contactNom').value,

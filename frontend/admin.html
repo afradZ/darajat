@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darajat - Espace Administrateur</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .admin-header { background-color: var(--primary, #1e293b); color: white; padding: 120px 20px 80px; text-align: center; }
+        .admin-header h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 700; }
+        .admin-container { max-width: 1400px; margin: -50px auto 60px; padding: 0 20px; position: relative; z-index: 10; }
+        .dashboard-split { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+        @media (max-width: 1024px) { .dashboard-split { grid-template-columns: 1fr; } }
+        .admin-card { background: white; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); padding: 25px; }
+        
+        /* Bannières & Barres de recherche */
+        .stat-banner { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 15px 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid var(--primary); }
+        .stat-banner.green { border-left-color: #1e293b; }
+        .stat-banner h2 { margin: 0; font-size: 1.2rem; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+        .banner-controls { display: flex; align-items: center; gap: 15px; }
+        .search-input { padding: 8px 15px; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 0.9rem; outline: none; width: 200px; transition: 0.2s; }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1); }
+        .stat-banner .count { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+
+        /* Tables & Statuts */
+        .table-responsive { overflow-x: auto; min-height: 250px; } /* Min height stops page jumping */
+        .data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        .data-table th, .data-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        .data-table th { color: #64748b; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table tr:hover { background-color: #f8fafc; }
+        
+        /* Indicateurs Visuels */
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #cbd5e1; margin-right: 8px; }
+        .status-dot.new { background-color: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); }
+        .row-new { font-weight: 600; background-color: #f0f9ff !important; }
+        .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+        
+        /* Boutons d'Actions */
+        .actions-cell { display: flex; gap: 6px; align-items: center; }
+        .btn-action { width: 32px; height: 32px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: 0.2s; font-size: 0.85rem; text-decoration: none; }
+        .btn-mail { background: #3b82f6; } .btn-mail:hover { background: #2563eb; transform: scale(1.1); }
+        .btn-wa { background: #25d366; } .btn-wa:hover { background: #16a34a; transform: scale(1.1); }
+        .btn-check { background: #e2e8f0; color: #64748b; } .btn-check:hover { background: #10b981; color: white; transform: scale(1.1); }
+        
+        /* État Vide (Empty State) */
+        .empty-state { text-align: center; padding: 50px 20px; color: #64748b; display: none; }
+        .empty-state i { font-size: 3.5rem; color: #e2e8f0; margin-bottom: 15px; }
+        .empty-state h3 { font-size: 1.2rem; color: #334155; margin-bottom: 5px; }
+
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .page-btn { padding: 6px 12px; border: none; background: #f1f5f9; color: var(--primary); border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .page-btn.active { background: var(--primary); color: white; }
+    </style>
+</head>
+<body class="bg-gray">
+
+    <nav>
+        <a href="index.html" style="font-weight: 700; font-size: 1.2rem;"><i class="fa-solid fa-graduation-cap"></i> Darajat Admin</a>
+        <div style="flex-grow: 1;"></div>
+        <a href="index.html" class="btn" style="padding: 8px 15px; font-size: 0.9rem;"><i class="fa-solid fa-arrow-left"></i> Retour au site</a>
+    </nav>
+
+    <div class="admin-header"><h1>Tableau de Bord</h1></div>
+
+    <div class="admin-container">
+        <div class="dashboard-split">
+            
+            <!-- INSCRIPTIONS -->
+            <div class="admin-card">
+                <div class="stat-banner green">
+                    <h2><i class="fa-solid fa-user-graduate"></i> Inscriptions</h2>
+                    <div class="banner-controls">
+                        <!-- Barre de recherche -->
+                        <input type="text" id="search-insc" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerInscriptions()">
+                        <div class="count" id="count-inscriptions">0</div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table" id="table-inscriptions">
+                        <thead>
+                            <tr><th>Status</th><th>Nom</th><th>Formation</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="inscriptions-body"></tbody>
+                    </table>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-inscriptions" class="empty-state">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <h3>Tout est à jour !</h3>
+                        <p>Aucune inscription trouvée.</p>
+                    </div>
+                </div>
+                <div id="inscriptions-pagination" class="pagination"></div>
+            </div>
+
+            <!-- MESSAGES -->
+            <div class="admin-card">
+                <div class="stat-banner">
+                    <h2><i class="fa-solid fa-envelope-open-text"></i> Messages</h2>
+                    <div class="banner-controls">
+                        <!-- Barre de recherche -->
+                        <input type="text" id="search-msg" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerMessages()">
+                        <div class="count" id="count-messages">0</div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table" id="table-messages">
+                        <thead>
+                            <tr><th>Status</th><th>Nom</th><th>Message</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="messages-body"></tbody>
+                    </table>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-messages" class="empty-state">
+                        <i class="fa-regular fa-face-smile"></i>
+                        <h3>Boîte de réception vide</h3>
+                        <p>Aucun message à afficher.</p>
+                    </div>
+                </div>
+                <div id="messages-pagination" class="pagination"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
