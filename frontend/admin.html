@@ -53,9 +53,28 @@
         .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
         .page-btn { padding: 6px 12px; border: none; background: #f1f5f9; color: var(--primary); border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .page-btn.active { background: var(--primary); color: white; }
+
+        /* Login Overlay */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .login-box button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--primary); color: white; border: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-gray">
+    <!-- Login Overlay -->
+     <div id="login-overlay" class="login-overlay">
+        <div class="login-box">
+            <h2>Connexion Admin</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+                <input type="password" id="password" placeholder="Mot de passe" required>
+                <button type="submit">Se connecter</button>
+                <p id="login-error" style="color: red; display: none; margin-top: 10px;">Identifiants invalides</p>
+            </form>
+        </div>
+    </div>
 
     <nav>
         <a href="index.html" style="font-weight: 700; font-size: 1.2rem;"><i class="fa-solid fa-graduation-cap"></i> Darajat Admin</a>

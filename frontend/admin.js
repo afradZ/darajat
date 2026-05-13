@@ -6,30 +6,19 @@ let filteredInscriptions = [];
 let currentMsgPage = 1;
 let currentInscPage = 1;
 const rowsPerPage = 5;
- 
-// 1. DATA FETCHING 
 
-async function fetchDashboardData() {
-    try {
-        const msgResponse = await fetch('http://localhost:3000/api/admin/messages');
-        const msgResult = await msgResponse.json();
-        if (msgResult.success) {
-            allMessages = msgResult.data;
-            filtrerMessages();
-        }
-
-        const inscResponse = await fetch('http://localhost:3000/api/admin/inscriptions');
-        const inscResult = await inscResponse.json();
-        if (inscResult.success) {
-            allInscriptions = inscResult.data;
-            filtrerInscriptions();
-        }
-    } catch (error) {
-        console.error("Erreur de chargement des données:", error);
-    }
+// --- AUTHENTICATION ---
+function getAuthHeaders() {
+    return {
+        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        'Content-Type': 'application/json'
+    };
 }
 
-// 2. LIVE SEARCH / FILTER 
+function handleLogout() {
+    localStorage.removeItem('admin_token');
+    document.getElementById('login-overlay').classList.remove('hidden');
+}
 
 function debounce(func, wait) {
     let timeout;
@@ -37,6 +26,52 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
     };
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    
+    const res = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+        localStorage.setItem('admin_token', data.token);
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.getElementById('login-error').style.display = 'none';
+        fetchDashboardData();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+    }
+});
+
+// 1. DATA FETCHING 
+async function fetchDashboardData() {
+    const token = localStorage.getItem('admin_token');
+    if (!token) return handleLogout();
+
+    const headers = getAuthHeaders();
+
+    const msgResponse = await fetch('http://localhost:3000/api/admin/messages', { headers });
+    if (msgResponse.status === 401 || msgResponse.status === 403) return handleLogout();
+    const msgResult = await msgResponse.json();
+    if (msgResult.success) {
+        allMessages = msgResult.data;
+        filtrerMessages();
+    }
+
+    const inscResponse = await fetch('http://localhost:3000/api/admin/inscriptions', { headers });
+    const inscResult = await inscResponse.json();
+    if (inscResult.success) {
+        allInscriptions = inscResult.data;
+        filtrerInscriptions();
+    }
 }
 
 function filtrerMessages() {
@@ -199,7 +234,8 @@ function renderInscriptions() {
 async function marquerCommeLuMessage(id) {
     try {
         const response = await fetch(`http://localhost:3000/api/admin/messages/${id}/lu`, {
-            method: 'PUT'
+            method: 'PUT',
+            headers: getAuthHeaders()
         });
         const result = await response.json();
 
@@ -220,7 +256,9 @@ async function marquerCommeLuMessage(id) {
 async function marquerCommeLuInscription(id) {
     try {
         const response = await fetch(`http://localhost:3000/api/admin/inscriptions/${id}/lu`, {
-            method: 'PUT'
+            method: 'PUT',
+            headers: getAuthHeaders()
+
         });
         const result = await response.json();
 
@@ -243,7 +281,8 @@ async function supprimerMessage(id) {
 
     try {
         const response = await fetch(`http://localhost:3000/api/admin/messages/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
         const result = await response.json();
 
@@ -264,7 +303,8 @@ async function supprimerInscription(id) {
 
     try {
         const response = await fetch(`http://localhost:3000/api/admin/inscriptions/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
         });
         const result = await response.json();
 
@@ -313,9 +353,11 @@ function renderPaginationControls(containerId, totalItems, currentPage, onPageCh
 }
 
 window.onload = () => {
-    fetchDashboardData();
+    if (localStorage.getItem('admin_token')) {
+        document.getElementById('login-overlay').classList.add('hidden');
+        fetchDashboardData();
+    }
     
-    // Bind debounced search listeners
     document.getElementById('search-msg').addEventListener('input', debounce(filtrerMessages, 300));
     document.getElementById('search-insc').addEventListener('input', debounce(filtrerInscriptions, 300));
 };
