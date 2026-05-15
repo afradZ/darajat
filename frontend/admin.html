@@ -85,66 +85,70 @@
     <div class="admin-header"><h1>Tableau de Bord</h1></div>
 
     <div class="admin-container">
+        
+        <div class="admin-card" style="margin-bottom: 30px;">
+            <div class="stat-banner" style="border-left-color: #f59e0b;">
+                <h2><i class="fa-solid fa-certificate"></i> Générer une Attestation</h2>
+            </div>
+            <form id="form-attestation" onsubmit="genererAttestation(event)" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="nom-etudiant" class="search-input" placeholder="Nom complet de l'étudiant" required style="flex-grow: 1; min-width: 200px;">
+                <select id="formation-etudiant" class="search-input" required style="flex-grow: 1; min-width: 200px; background: white; cursor: pointer;">
+                    <option value="" disabled selected>Sélectionnez une formation...</option>
+                    <option value="Pédagogie moderne et appliquée">Pédagogie moderne et appliquée</option>
+                    <option value="Psychologie de l'enfant et de l'adolescent">Psychologie de l'enfant et de l'adolescent</option>
+                    <option value="Méthodologies de soutien scolaire">Méthodologies de soutien scolaire</option>
+                    <option value="Développement Web & Ingénierie logicielle">Développement Web & Ingénierie logicielle</option>
+                    <option value="Marketing Digital & Stratégie">Marketing Digital & Stratégie</option>
+                    <option value="Design Graphique & UI/UX">Design Graphique & UI/UX</option>
+                    </select>
+                <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px;">
+                    Générer le Code
+                </button>
+            </form>
+            <div id="resultat-attestation" style="margin-top: 15px; display: none; padding: 15px; border-radius: 8px; font-weight: 600;">
+                </div>
+        </div>
+
         <div class="dashboard-split">
-            
-            <!-- INSCRIPTIONS -->
             <div class="admin-card">
                 <div class="stat-banner green">
                     <h2><i class="fa-solid fa-user-graduate"></i> Inscriptions</h2>
                     <div class="banner-controls">
-                        <!-- Barre de recherche -->
                         <input type="text" id="search-insc" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerInscriptions()">
                         <div class="count" id="count-inscriptions">0</div>
                     </div>
                 </div>
-                
                 <div class="table-responsive">
                     <table class="data-table" id="table-inscriptions">
-                        <thead>
-                            <tr><th>Status</th><th>Nom</th><th>Formation</th><th>Actions</th></tr>
-                        </thead>
+                        <thead><tr><th>Status</th><th>Nom</th><th>Formation</th><th>Actions</th></tr></thead>
                         <tbody id="inscriptions-body"></tbody>
                     </table>
-                    
-                    <!-- Empty State -->
                     <div id="empty-inscriptions" class="empty-state">
-                        <i class="fa-solid fa-clipboard-check"></i>
-                        <h3>Tout est à jour !</h3>
-                        <p>Aucune inscription trouvée.</p>
+                        <i class="fa-solid fa-clipboard-check"></i><h3>Tout est à jour !</h3><p>Aucune inscription trouvée.</p>
                     </div>
                 </div>
                 <div id="inscriptions-pagination" class="pagination"></div>
             </div>
 
-            <!-- MESSAGES -->
             <div class="admin-card">
                 <div class="stat-banner">
                     <h2><i class="fa-solid fa-envelope-open-text"></i> Messages</h2>
                     <div class="banner-controls">
-                        <!-- Barre de recherche -->
                         <input type="text" id="search-msg" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerMessages()">
                         <div class="count" id="count-messages">0</div>
                     </div>
                 </div>
-                
                 <div class="table-responsive">
                     <table class="data-table" id="table-messages">
-                        <thead>
-                            <tr><th>Status</th><th>Nom</th><th>Message</th><th>Actions</th></tr>
-                        </thead>
+                        <thead><tr><th>Status</th><th>Nom</th><th>Message</th><th>Actions</th></tr></thead>
                         <tbody id="messages-body"></tbody>
                     </table>
-                    
-                    <!-- Empty State -->
                     <div id="empty-messages" class="empty-state">
-                        <i class="fa-regular fa-face-smile"></i>
-                        <h3>Boîte de réception vide</h3>
-                        <p>Aucun message à afficher.</p>
+                        <i class="fa-regular fa-face-smile"></i><h3>Boîte de réception vide</h3><p>Aucun message à afficher.</p>
                     </div>
                 </div>
                 <div id="messages-pagination" class="pagination"></div>
             </div>
-
         </div>
     </div>
 

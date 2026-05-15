@@ -95,39 +95,65 @@ async function soumettreInscription(event) {
 
 // CONNECTED TO BACKEND: CHECKS POSTGRESQL FOR CERTIFICATES 
 async function verifierAttestation() {
-    let codeInput = document.getElementById("codeAttestation").value.trim();
-    let resultat = document.getElementById("resultat");
+    const codeInput = document.getElementById('codeAttestation');
+    const code = codeInput.value.trim();
+    const resultDiv = document.getElementById('resultat');
 
-    if(codeInput === "") {
-        resultat.innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> Veuillez entrer un code.";
-        resultat.style.backgroundColor = "#f1f5f9";
-        resultat.style.color = "var(--text-light)";
+    if (!code) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<p style="color: #ef4444; text-align: center; margin-top: 15px;">Veuillez entrer un code.</p>';
         return;
     }
+
+    // Reset styles while fetching
+    resultDiv.style.display = 'block';
+    resultDiv.style.marginTop = '20px';
+    resultDiv.style.padding = '20px';
+    resultDiv.style.borderRadius = '8px';
+    resultDiv.style.textAlign = 'left';
+    resultDiv.innerHTML = '<p style="text-align: center; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Vérification en cours...</p>';
 
     try {
         const response = await fetch('http://localhost:3000/api/verification', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: codeInput })
+            body: JSON.stringify({ code })
         });
-
+        
         const data = await response.json();
 
-        if(data.valide) {
-            resultat.innerHTML = `<i class='fa-solid fa-shield-check'></i> Attestation authentique. <br> Délivrée à : <b>${data.etudiant}</b>`;
-            resultat.style.backgroundColor = "#d1fae5";
-            resultat.style.color = "#047857";
+        if (data.valide) {
+            const dateStr = new Date(data.date_emission).toLocaleDateString('fr-FR');
+            
+            resultDiv.style.background = '#f0fdf4';
+            resultDiv.style.color = '#166534';
+            resultDiv.style.border = '1px solid #bbf7d0';
+            resultDiv.innerHTML = `
+                <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check"></i> Attestation Valide
+                </h3>
+                <div style="line-height: 1.6;">
+                    <p style="margin: 0;"><b>Étudiant :</b> ${data.nom_etudiant}</p>
+                    <p style="margin: 0;"><b>Formation :</b> <span style="background: white; padding: 2px 8px; border-radius: 12px; font-size: 0.9em; border: 1px solid #bbf7d0;">${data.formation}</span></p>
+                    <p style="margin: 0;"><b>Délivrée le :</b> ${dateStr}</p>
+                </div>
+            `;
         } else {
-            resultat.innerHTML = "<i class='fa-solid fa-circle-xmark'></i> Attestation introuvable ou invalide.";
-            resultat.style.backgroundColor = "#fee2e2";
-            resultat.style.color = "#b91c1c"; 
+            resultDiv.style.background = '#fef2f2';
+            resultDiv.style.color = '#991b1b';
+            resultDiv.style.border = '1px solid #fecaca';
+            resultDiv.innerHTML = `
+                <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-xmark"></i> Code introuvable ou attestation révoquée.
+                </p>
+            `;
         }
     } catch (error) {
-        console.error("Erreur de connexion au serveur:", error);
-        resultat.innerHTML = "Erreur de connexion au serveur de vérification.";
-        resultat.style.backgroundColor = "#fee2e2";
-        resultat.style.color = "#b91c1c";
+        console.error('Erreur de vérification:', error);
+        resultDiv.style.background = '#fef2f2';
+        resultDiv.style.color = '#991b1b';
+        resultDiv.style.border = '1px solid #fecaca';
+        resultDiv.innerHTML = `<p style="margin: 0; text-align: center;">Erreur de connexion au serveur.</p>`;
     }
 }
 

@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors'); 
 const { Pool } = require('pg'); 
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,19 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
+const authenticateToken = (req, res, next) => {
+    // Expects header format: "Authorization: Bearer <token>"
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; 
+
+    if (!token) return res.status(401).json({ success: false, message: "Accès refusé" });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ success: false, message: "Token invalide ou expiré" });
+        req.user = user;
+        next(); // Token is good, proceed to the route
+    });
+};
 
 // 2. API ENDPOINTS 
 
@@ -41,28 +55,53 @@ app.post('/api/inscription', async (req, res) => {
 
 // Endpoint B: Verify Certificate
 app.post('/api/verification', async (req, res) => {
-    // 1. THE SPY: This will print the exact moment the frontend knocks on the door
-    console.log(" Demande de vérification reçue ! Données :", req.body); 
-
     try {
         const { code } = req.body;
         
         const result = await pool.query(
-            'SELECT * FROM attestations WHERE code_attestation = $1 AND est_valide = TRUE',
+            'SELECT nom_etudiant, formation, date_emission FROM attestations WHERE code_unique = $1 AND est_valide = TRUE',
             [code]
         );
         
         if (result.rows.length > 0) {
-            console.log(" Code trouvé pour:", result.rows[0].nom_etudiant);
-            res.json({ valide: true, etudiant: result.rows[0].nom_etudiant });
+            res.json({ valide: true, ...result.rows[0] });
         } else {
-            console.log(" Code introuvable dans la base de données.");
             res.json({ valide: false });
         }
     } catch (err) {
-        // 2. THE ALARM: This prints the FULL error, not just the message
-        console.error(" ERREUR CRITIQUE BASE DE DONNÉES :", err); 
+        console.error("Erreur vérification:", err);
         res.status(500).json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+app.post('/api/admin/attestations', authenticateToken, async (req, res) => {
+    try {
+        const { nom_etudiant, formation } = req.body;
+        if (!nom_etudiant || !formation) return res.status(400).json({ success: false, message: "Données incomplètes." });
+
+        const year = new Date().getFullYear();
+        const randomHex = crypto.randomBytes(3).toString('hex').toUpperCase();
+        const codeUnique = `DAR-${year}-${randomHex}`;
+
+        const result = await pool.query(
+            'INSERT INTO attestations (code_unique, nom_etudiant, formation) VALUES ($1, $2, $3) RETURNING *',
+            [codeUnique, nom_etudiant, formation]
+        );
+
+        res.status(201).json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Erreur serveur" });
+    }
+});
+
+app.put('/api/admin/attestations/:id/invalider', authenticateToken, async (req, res) => {
+    try {
+        await pool.query('UPDATE attestations SET est_valide = FALSE WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: "Attestation révoquée." });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
     }
 });
 
@@ -87,20 +126,6 @@ app.post('/api/contact', async (req, res) => {
         res.status(500).json({ success: false, message: "Erreur lors de l'envoi." });
     }
 });
-
-const authenticateToken = (req, res, next) => {
-    // Expects header format: "Authorization: Bearer <token>"
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; 
-
-    if (!token) return res.status(401).json({ success: false, message: "Accès refusé" });
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ success: false, message: "Token invalide ou expiré" });
-        req.user = user;
-        next(); // Token is good, proceed to the route
-    });
-};
 
 // Endpoint D: Récupérer tous les messages (Admin)
 app.get('/api/admin/messages', authenticateToken, async (req, res) => {
@@ -198,8 +223,11 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
 // 3. Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(` Serveur Darajat en ligne sur http://localhost:${PORT}`);
 });
+
+

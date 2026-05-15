@@ -7,6 +7,7 @@ let currentMsgPage = 1;
 let currentInscPage = 1;
 const rowsPerPage = 5;
 
+
 // --- AUTHENTICATION ---
 function getAuthHeaders() {
     return {
@@ -317,6 +318,45 @@ async function supprimerInscription(id) {
     } catch (error) {
         console.error("Erreur DELETE inscription:", error);
         alert("Impossible de contacter le serveur.");
+    }
+}
+
+// --- CERTIFICATE GENERATION ---
+async function genererAttestation(e) {
+    e.preventDefault(); // Stop the page refresh immediately
+
+    const nom = document.getElementById('nom-etudiant').value.trim();
+    const formation = document.getElementById('formation-etudiant').value.trim();
+    const resultDiv = document.getElementById('resultat-attestation');
+
+    try {
+        const response = await fetch('http://localhost:3000/api/admin/attestations', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ nom_etudiant: nom, formation: formation })
+        });
+        
+        const data = await response.json();
+
+        if (data.success) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#f0fdf4';
+            resultDiv.style.color = '#166534';
+            resultDiv.style.border = '1px solid #bbf7d0';
+            resultDiv.innerHTML = `Succès ! Le code pour <b>${nom}</b> est : <span style="font-size: 1.2rem; margin-left: 10px; padding: 4px 10px; background: white; border-radius: 4px; border: 1px dashed #166534;">${data.data.code_unique}</span>`;
+            
+            // Clear inputs
+            document.getElementById('nom-etudiant').value = ''; 
+            document.getElementById('formation-etudiant').value = ''; 
+        } else {
+            throw new Error(data.message || 'Erreur serveur');
+        }
+    } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fef2f2';
+        resultDiv.style.color = '#991b1b';
+        resultDiv.style.border = '1px solid #fecaca';
+        resultDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${error.message}`;
     }
 }
  
