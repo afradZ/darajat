@@ -16,7 +16,6 @@
         @media (max-width: 1024px) { .dashboard-split { grid-template-columns: 1fr; } }
         .admin-card { background: white; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); padding: 25px; }
         
-        /* Bannières & Barres de recherche */
         .stat-banner { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 15px 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid var(--primary); }
         .stat-banner.green { border-left-color: #1e293b; }
         .stat-banner h2 { margin: 0; font-size: 1.2rem; color: #1e293b; display: flex; align-items: center; gap: 10px; }
@@ -25,27 +24,23 @@
         .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1); }
         .stat-banner .count { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
 
-        /* Tables & Statuts */
-        .table-responsive { overflow-x: auto; min-height: 250px; } /* Min height stops page jumping */
+        .table-responsive { overflow-x: auto; min-height: 250px; } 
         .data-table { width: 100%; border-collapse: collapse; min-width: 500px; }
         .data-table th, .data-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
         .data-table th { color: #64748b; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .data-table tr:hover { background-color: #f8fafc; }
         
-        /* Indicateurs Visuels */
         .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #cbd5e1; margin-right: 8px; }
         .status-dot.new { background-color: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.5); }
         .row-new { font-weight: 600; background-color: #f0f9ff !important; }
         .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
         
-        /* Boutons d'Actions */
         .actions-cell { display: flex; gap: 6px; align-items: center; }
         .btn-action { width: 32px; height: 32px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: 0.2s; font-size: 0.85rem; text-decoration: none; }
         .btn-mail { background: #3b82f6; } .btn-mail:hover { background: #2563eb; transform: scale(1.1); }
         .btn-wa { background: #25d366; } .btn-wa:hover { background: #16a34a; transform: scale(1.1); }
         .btn-check { background: #e2e8f0; color: #64748b; } .btn-check:hover { background: #10b981; color: white; transform: scale(1.1); }
         
-        /* État Vide (Empty State) */
         .empty-state { text-align: center; padding: 50px 20px; color: #64748b; display: none; }
         .empty-state i { font-size: 3.5rem; color: #e2e8f0; margin-bottom: 15px; }
         .empty-state h3 { font-size: 1.2rem; color: #334155; margin-bottom: 5px; }
@@ -54,8 +49,7 @@
         .page-btn { padding: 6px 12px; border: none; background: #f1f5f9; color: var(--primary); border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .page-btn.active { background: var(--primary); color: white; }
 
-        /* Login Overlay */
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
         .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
         .login-box button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--primary); color: white; border: none; }
@@ -63,8 +57,7 @@
     </style>
 </head>
 <body class="bg-gray">
-    <!-- Login Overlay -->
-     <div id="login-overlay" class="login-overlay">
+    <div id="login-overlay" class="login-overlay">
         <div class="login-box">
             <h2>Connexion Admin</h2>
             <form id="login-form">
@@ -76,23 +69,150 @@
         </div>
     </div>
 
-    <nav>
-        <a href="index.html" style="font-weight: 700; font-size: 1.2rem;"><i class="fa-solid fa-graduation-cap"></i> Darajat Admin</a>
-        <div style="flex-grow: 1;"></div>
-        <a href="index.html" class="btn" style="padding: 8px 15px; font-size: 0.9rem;"><i class="fa-solid fa-arrow-left"></i> Retour au site</a>
+    <nav style="display: flex; gap: 20px; align-items: center;">
+        <a href="#" style="font-weight: 700; font-size: 1.2rem; margin-right: auto;"><i class="fa-solid fa-graduation-cap"></i> Darajat Admin</a>
+        <button id="nav-btn-dashboard" onclick="switchView('dashboard')" style="background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; padding: 8px 16px; border-radius: 8px;"><i class="fa-solid fa-chart-pie"></i> Vue Générale</button>
+        <button id="nav-btn-etudiants" onclick="switchView('etudiants')" style="background: transparent; color: var(--primary); border: none; font-weight: bold; cursor: pointer; padding: 8px 16px; border-radius: 8px;"><i class="fa-solid fa-users"></i> Base Étudiants</button>
+        <button onclick="handleLogout()" class="btn" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-power-off"></i></button>
     </nav>
 
     <div class="admin-header"><h1>Tableau de Bord</h1></div>
 
     <div class="admin-container">
-        
-        <div class="admin-card" style="margin-bottom: 30px;">
-            <div class="stat-banner" style="border-left-color: #f59e0b;">
-                <h2><i class="fa-solid fa-certificate"></i> Générer une Attestation</h2>
+        <div id="view-dashboard">
+            <div class="dashboard-split">
+                <div class="admin-card">
+                    <div class="stat-banner green">
+                        <h2><i class="fa-solid fa-user-graduate"></i> Inscriptions</h2>
+                        <div class="banner-controls">
+                            <input type="text" id="search-insc" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerInscriptions()">
+                            <div class="count" id="count-inscriptions">0</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="table-inscriptions">
+                            <thead><tr><th>Status</th><th>Nom</th><th>Formation</th><th>Actions</th></tr></thead>
+                            <tbody id="inscriptions-body"></tbody>
+                        </table>
+                        <div id="empty-inscriptions" class="empty-state">
+                            <i class="fa-solid fa-clipboard-check"></i><h3>Tout est à jour !</h3><p>Aucune inscription trouvée.</p>
+                        </div>
+                    </div>
+                    <div id="inscriptions-pagination" class="pagination"></div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="stat-banner">
+                        <h2><i class="fa-solid fa-envelope-open-text"></i> Messages</h2>
+                        <div class="banner-controls">
+                            <input type="text" id="search-msg" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerMessages()">
+                            <div class="count" id="count-messages">0</div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="table-messages">
+                            <thead><tr><th>Status</th><th>Nom</th><th>Message</th><th>Actions</th></tr></thead>
+                            <tbody id="messages-body"></tbody>
+                        </table>
+                        <div id="empty-messages" class="empty-state">
+                            <i class="fa-regular fa-face-smile"></i><h3>Boîte de réception vide</h3><p>Aucun message à afficher.</p>
+                        </div>
+                    </div>
+                    <div id="messages-pagination" class="pagination"></div>
+                </div>
             </div>
-            <form id="form-attestation" onsubmit="genererAttestation(event)" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="nom-etudiant" class="search-input" placeholder="Nom complet de l'étudiant" required style="flex-grow: 1; min-width: 200px;">
-                <select id="formation-etudiant" class="search-input" required style="flex-grow: 1; min-width: 200px; background: white; cursor: pointer;">
+        </div>
+
+        <div id="view-etudiants" class="hidden">
+            <div class="admin-card">
+                <div class="stat-banner" style="border-left-color: #3b82f6;">
+                    <h2><i class="fa-solid fa-users"></i> Base de Données Étudiants</h2>
+                    <div class="banner-controls">
+                        <button onclick="openAjoutModal()" style="background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap;">
+                            <i class="fa-solid fa-user-plus"></i> Nouveau
+                        </button>
+                        
+                        <select id="filter-formation" class="search-input" onchange="filtrerBaseEtudiants()" style="width: 220px;">
+                            <option value="all">Toutes les formations</option>
+                            <option value="Pédagogie moderne et appliquée">Pédagogie moderne et appliquée</option>
+                            <option value="Psychologie de l'enfant et de l'adolescent">Psychologie de l'enfant</option>
+                            <option value="Méthodologies de soutien scolaire">Soutien scolaire</option>
+                            <option value="Développement Web & Ingénierie logicielle">Développement Web</option>
+                            <option value="Marketing Digital & Stratégie">Marketing Digital</option>
+                            <option value="Design Graphique & UI/UX">Design Graphique</option>
+                        </select>
+
+                        <select id="filter-status" class="search-input" onchange="filtrerBaseEtudiants()">
+                            <option value="all">Tous les statuts</option>
+                            <option value="En cours">En cours</option>
+                            <option value="Diplômé">Diplômé</option>
+                            <option value="Abandon">Abandon</option>
+                        </select>
+                        <input type="text" id="search-etudiants" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerBaseEtudiants()">
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Nom</th><th>Contact</th><th>Formation</th><th>Statut</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="base-etudiants-body"></tbody>
+                    </table>
+                </div>
+        
+                <div id="base-etudiants-pagination" class="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cert-modal-overlay" class="login-overlay hidden" onclick="closeCertModal()">
+        <div class="login-box" style="max-width: 450px; position: relative; padding-top: 35px;" onclick="event.stopPropagation()">
+            <button onclick="closeCertModal()" style="position: absolute; top: 40px; right: 40px; background: none; border: none; font-size: 2.2rem; cursor: pointer; color: #94a3b8; line-height: 1; padding: 0; width: auto; margin: 0;">&times;</button>
+            <div style="margin-bottom: 25px; text-align: left;">
+                <h2 style="margin: 0; color: #1e293b; font-size: 1.35rem;">
+                    <i class="fa-solid fa-certificate" style="color: #f59e0b;"></i> Créer Attestation
+                </h2>
+            </div>
+            
+            <form id="form-attestation" onsubmit="genererAttestation(event)" style="display: flex; flex-direction: column; gap: 15px;">
+                <div style="text-align: left;">
+                    <label style="font-size: 0.85rem; color: #64748b; font-weight: bold;">Étudiant</label>
+                    <input type="text" id="nom-etudiant" class="search-input" required readonly style="background: #f1f5f9; cursor: not-allowed; width: 100%; box-sizing: border-box;">
+                </div>
+                <div style="text-align: left;">
+                    <label style="font-size: 0.85rem; color: #64748b; font-weight: bold;">Formation</label>
+                    <input type="text" id="formation-etudiant" class="search-input" required readonly style="background: #f1f5f9; cursor: not-allowed; width: 100%; box-sizing: border-box;">
+                </div>
+                <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+                    Générer le Code
+                </button>
+            </form>
+            <div id="resultat-attestation" style="margin-top: 15px; display: none; padding: 15px; border-radius: 8px; font-weight: 600; text-align: left; font-size: 0.95rem;">
+            </div>
+        </div>
+    </div>
+
+    <div id="ajout-modal-overlay" class="login-overlay hidden" onclick="closeAjoutModal()">
+        <div class="login-box" style="max-width: 450px; position: relative; padding-top: 35px;" onclick="event.stopPropagation()">
+            <button onclick="closeAjoutModal()" style="position: absolute; top: 35px; right: 40px; background: none; border: none; font-size: 2.2rem; cursor: pointer; color: #94a3b8; line-height: 1; padding: 0; width: auto; margin: 0;">&times;</button>
+            
+            <div style="margin-bottom: 25px; text-align: left;">
+                <h2 style="margin: 0; color: #1e293b; font-size: 1.35rem;">
+                    <i class="fa-solid fa-user-plus" style="color: #10b981;"></i> Ajouter Étudiant
+                </h2>
+            </div>
+            
+            <form id="form-ajout-etudiant" onsubmit="ajouterEtudiantManuel(event)" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="ajout-nom" class="search-input" placeholder="Nom complet" required style="width: 100%; box-sizing: border-box;">
+                <input type="email" id="ajout-email" class="search-input" placeholder="Adresse Email (Optionnel)" style="width: 100%; box-sizing: border-box;">
+                <div style="display: flex; align-items: stretch; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: white; width: 100%; box-sizing: border-box;">
+                    <span style="display: flex; align-items: center; padding: 0 15px; background: #f1f5f9; color: #64748b; font-weight: bold; border-right: 1px solid #cbd5e1;">
+                        +212
+                    </span>
+                    <input type="tel" id="ajout-tel" placeholder="6 12 34 56 78" required style="flex-grow: 1; padding: 12px; border: none; margin: 0; border-radius: 0; outline: none; font-size: 0.9rem;">
+                </div>
+                <select id="ajout-formation" class="search-input" required style="width: 100%; box-sizing: border-box; background: white; cursor: pointer;">
                     <option value="" disabled selected>Sélectionnez une formation...</option>
                     <option value="Pédagogie moderne et appliquée">Pédagogie moderne et appliquée</option>
                     <option value="Psychologie de l'enfant et de l'adolescent">Psychologie de l'enfant et de l'adolescent</option>
@@ -100,55 +220,11 @@
                     <option value="Développement Web & Ingénierie logicielle">Développement Web & Ingénierie logicielle</option>
                     <option value="Marketing Digital & Stratégie">Marketing Digital & Stratégie</option>
                     <option value="Design Graphique & UI/UX">Design Graphique & UI/UX</option>
-                    </select>
-                <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px;">
-                    Générer le Code
+                </select>
+                <button type="submit" style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+                    Sauvegarder
                 </button>
             </form>
-            <div id="resultat-attestation" style="margin-top: 15px; display: none; padding: 15px; border-radius: 8px; font-weight: 600;">
-                </div>
-        </div>
-
-        <div class="dashboard-split">
-            <div class="admin-card">
-                <div class="stat-banner green">
-                    <h2><i class="fa-solid fa-user-graduate"></i> Inscriptions</h2>
-                    <div class="banner-controls">
-                        <input type="text" id="search-insc" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerInscriptions()">
-                        <div class="count" id="count-inscriptions">0</div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="data-table" id="table-inscriptions">
-                        <thead><tr><th>Status</th><th>Nom</th><th>Formation</th><th>Actions</th></tr></thead>
-                        <tbody id="inscriptions-body"></tbody>
-                    </table>
-                    <div id="empty-inscriptions" class="empty-state">
-                        <i class="fa-solid fa-clipboard-check"></i><h3>Tout est à jour !</h3><p>Aucune inscription trouvée.</p>
-                    </div>
-                </div>
-                <div id="inscriptions-pagination" class="pagination"></div>
-            </div>
-
-            <div class="admin-card">
-                <div class="stat-banner">
-                    <h2><i class="fa-solid fa-envelope-open-text"></i> Messages</h2>
-                    <div class="banner-controls">
-                        <input type="text" id="search-msg" class="search-input" placeholder="Rechercher un nom..." oninput="filtrerMessages()">
-                        <div class="count" id="count-messages">0</div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="data-table" id="table-messages">
-                        <thead><tr><th>Status</th><th>Nom</th><th>Message</th><th>Actions</th></tr></thead>
-                        <tbody id="messages-body"></tbody>
-                    </table>
-                    <div id="empty-messages" class="empty-state">
-                        <i class="fa-regular fa-face-smile"></i><h3>Boîte de réception vide</h3><p>Aucun message à afficher.</p>
-                    </div>
-                </div>
-                <div id="messages-pagination" class="pagination"></div>
-            </div>
         </div>
     </div>
 

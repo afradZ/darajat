@@ -1,12 +1,20 @@
 // --- GLOBAL VARIABLES --- 
 let allMessages = [];
-let allInscriptions = [];
 let filteredMessages = [];
-let filteredInscriptions = [];
 let currentMsgPage = 1;
 let currentInscPage = 1;
-const rowsPerPage = 5;
+const rowsPerPage = 10;
 
+// --- Neutralizes HTML tags to prevent XSS execution ---
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 // --- AUTHENTICATION ---
 function getAuthHeaders() {
@@ -59,6 +67,7 @@ async function fetchDashboardData() {
 
     const headers = getAuthHeaders();
 
+    // 1. Fetch Messages (Still handled in-memory for now)
     const msgResponse = await fetch('http://localhost:3000/api/admin/messages', { headers });
     if (msgResponse.status === 401 || msgResponse.status === 403) return handleLogout();
     const msgResult = await msgResponse.json();
@@ -67,14 +76,40 @@ async function fetchDashboardData() {
         filtrerMessages();
     }
 
-    const inscResponse = await fetch('http://localhost:3000/api/admin/inscriptions', { headers });
-    const inscResult = await inscResponse.json();
-    if (inscResult.success) {
-        allInscriptions = inscResult.data;
-        filtrerInscriptions();
+    // 2. Fetch Inscriptions (Server-side paginated)
+    fetchInscriptions();
+
+    // 3. Restore View
+    const savedView = localStorage.getItem('active_admin_view') || 'dashboard';
+    switchView(savedView);
+}
+
+async function fetchInscriptions() {
+    const token = localStorage.getItem('admin_token');
+    if (!token) return;
+
+    const query = document.getElementById('search-etudiants')?.value || document.getElementById('search-insc')?.value || '';
+    const status = document.getElementById('filter-status')?.value || 'all';
+    const formation = document.getElementById('filter-formation')?.value || 'all';
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/inscriptions?page=${currentInscPage}&limit=${rowsPerPage}&search=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&formation=${encodeURIComponent(formation)}`, {
+            headers: getAuthHeaders()
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+            // Read the dedicated unread count from the server meta tag
+            document.getElementById('count-inscriptions').innerText = result.meta.unreadItems;
+            renderInscriptions(result.data, result.meta);
+        }
+    } catch (err) {
+        console.error("Erreur fetch inscriptions:", err);
     }
 }
 
+// 2. FILTERS
 function filtrerMessages() {
     const query = document.getElementById('search-msg').value.toLowerCase().trim();
     filteredMessages = allMessages.filter(msg =>
@@ -87,33 +122,22 @@ function filtrerMessages() {
     renderMessages();
 }
 
+function filtrerBaseEtudiants() {
+    currentInscPage = 1; 
+    fetchInscriptions();
+}
+
 function filtrerInscriptions() {
-    const query = document.getElementById('search-insc').value.toLowerCase().trim();
-    filteredInscriptions = allInscriptions.filter(insc =>
-        insc.nom_complet.toLowerCase().includes(query) ||
-        insc.email.toLowerCase().includes(query) ||
-        insc.telephone.toLowerCase().includes(query) ||
-        insc.formation.toLowerCase().includes(query)
-    );
-    currentInscPage = 1;
-    updateInscriptionCount();
-    renderInscriptions();
+    filtrerBaseEtudiants(); 
 }
 
 // 3. COUNTERS 
-
 function updateMessageCount() {
     const unread = filteredMessages.filter(m => m.statut !== 'lu').length;
     document.getElementById('count-messages').innerText = unread;
 }
 
-function updateInscriptionCount() {
-    const unread = filteredInscriptions.filter(i => i.statut !== 'lu').length;
-    document.getElementById('count-inscriptions').innerText = unread;
-}
- 
-// 4. RENDERING TABLES WITH PAGINATION 
-
+// 4. RENDERING TABLES
 function renderMessages() {
     const tbody = document.getElementById('messages-body');
     const emptyState = document.getElementById('empty-messages');
@@ -136,25 +160,25 @@ function renderMessages() {
     paginatedMessages.forEach(msg => {
         const isNew = msg.statut !== 'lu';
         const checkBtn = isNew
-            ? `<button class="btn-action btn-check" onclick="marquerCommeLuMessage(${msg.id})" title="Marquer comme lu"><i class="fa-solid fa-check"></i></button>`
+            ? `<button class="btn-action btn-check" onclick="marquerCommeLuMessage('${msg.id}')" title="Marquer comme lu"><i class="fa-solid fa-check"></i></button>`
             : `<button class="btn-action" style="background:#10b981;opacity:0.4;cursor:default;" disabled title="Déjà lu"><i class="fa-solid fa-check"></i></button>`;
 
         html += `
         <tr class="${isNew ? 'row-new' : ''}">
             <td><span class="status-dot ${isNew ? 'new' : ''}"></span></td>
             <td>
-                <b>${msg.nom}</b><br>
-                <small style="color:#64748b;">${msg.email}</small>
+                <b>${escapeHTML(msg.nom)}</b><br>
+                <small style="color:#64748b;">${escapeHTML(msg.email)}</small>
             </td>
-            <td>${msg.message}</td>
+            <td>${escapeHTML(msg.message)}</td>
             <td>
                 <div class="actions-cell">
-                    <a href="mailto:${msg.email}" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${escapeHTML(msg.email)}" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
                     <div style="display:flex;flex-direction:column;gap:6px;">
                         ${checkBtn}
-                        <button class="btn-action" style="background:#ef4444;" onclick="supprimerMessage(${msg.id})" title="Supprimer">
+                        <button class="btn-action" style="background:#ef4444;" onclick="supprimerMessage('${msg.id}')" title="Supprimer">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
@@ -170,68 +194,86 @@ function renderMessages() {
     });
 }
 
-function renderInscriptions() {
-    const tbody = document.getElementById('inscriptions-body');
-    const emptyState = document.getElementById('empty-inscriptions');
-    const pagination = document.getElementById('inscriptions-pagination');
+function renderInscriptions(dataChunk, meta) {
+    const isDashboard = !document.getElementById('view-dashboard').classList.contains('hidden');
+    const tbody = document.getElementById(isDashboard ? 'inscriptions-body' : 'base-etudiants-body');
+    const emptyState = document.getElementById('empty-inscriptions'); 
+    const paginationId = isDashboard ? 'inscriptions-pagination' : 'base-etudiants-pagination'; 
+    
     tbody.innerHTML = "";
 
-    if (filteredInscriptions.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#64748b;">Aucun résultat.</td></tr>`;
-        emptyState.style.display = 'block';
-        pagination.innerHTML = '';
+    if (dataChunk.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#64748b;padding:20px;">Aucun étudiant trouvé.</td></tr>`;
+        if (emptyState && isDashboard) emptyState.style.display = 'block';
+        if (paginationId) document.getElementById(paginationId).innerHTML = '';
         return;
     }
 
-    emptyState.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
 
-    const start = (currentInscPage - 1) * rowsPerPage;
-    const paginatedInscriptions = filteredInscriptions.slice(start, start + rowsPerPage);
+    tbody.innerHTML = dataChunk.map(etu => {
+        let telClean = etu.telephone.replace(/\D/g, '');
+        if (telClean.startsWith('0') && telClean.length === 10) telClean = '212' + telClean.substring(1);
+        else if (!telClean.startsWith('212')) telClean = '212' + telClean;
 
-    let html = "";
-    paginatedInscriptions.forEach(insc => {
-        const isNew = insc.statut !== 'lu';
-        const telClean = insc.telephone.replace(/\D/g, '');
-        const checkBtn = isNew
-            ? `<button class="btn-action btn-check" onclick="marquerCommeLuInscription(${insc.id})" title="Marquer comme lu"><i class="fa-solid fa-check"></i></button>`
-            : `<button class="btn-action" style="background:#10b981;opacity:0.4;cursor:default;" disabled title="Déjà lu"><i class="fa-solid fa-check"></i></button>`;
+        const currentStatus = etu.statut_scolaire || 'En cours';
+        const isNew = etu.statut !== 'lu';
+        const safeName = etu.nom_complet.replace(/\\/g, '\\\\').replace(/['’]/g, "\\'").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+        const safeFormation = etu.formation.replace(/\\/g, '\\\\').replace(/['’]/g, "\\'").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-        html += `
-        <tr class="${isNew ? 'row-new' : ''}">
-            <td><span class="status-dot ${isNew ? 'new' : ''}"></span></td>
+        const dotHtml = isDashboard ? `<td><span class="status-dot ${isNew ? 'new' : ''}"></span></td>` : '';
+        
+        let checkBtn = '';
+        if (isDashboard) {
+            checkBtn = isNew 
+                ? `<button class="btn-action btn-check" onclick="marquerCommeLuInscription('${etu.id}')" title="Marquer comme lu"><i class="fa-solid fa-check"></i></button>`
+                : `<button class="btn-action" style="background:#10b981;opacity:0.4;cursor:default;" disabled title="Déjà lu"><i class="fa-solid fa-check"></i></button>`;
+        }
+
+        return `
+        <tr class="${isNew && isDashboard ? 'row-new' : ''}">
+            ${dotHtml}
             <td>
-                <b>${insc.nom_complet}</b><br>
-                <small style="color:#64748b;">${insc.email}</small>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                    <b>${escapeHTML(etu.nom_complet)}</b>
+                    <span style="font-family: monospace; background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" title="ID Étudiant">
+                        #${etu.id}
+                    </span>
+                </div>
+                <small style="color:#64748b;">${escapeHTML(etu.email)}</small>
             </td>
-            <td><span class="badge">${insc.formation}</span></td>
+            ${isDashboard ? `<td><span class="badge">${escapeHTML(etu.formation)}</span></td>` : `<td><small style="color:#64748b;">${escapeHTML(etu.telephone)}</small></td><td>${escapeHTML(etu.formation)}</td>`}
+            <td>
+                <select onchange="updateStatutEtudiant('${etu.id}', this.value)" style="padding:4px; border-radius:4px; border:1px solid #cbd5e1; font-size:0.85rem;">
+                    <option value="En cours" ${currentStatus === 'En cours' ? 'selected' : ''}>En cours</option>
+                    <option value="Diplômé" ${currentStatus === 'Diplômé' ? 'selected' : ''}>Diplômé</option>
+                    <option value="Abandon" ${currentStatus === 'Abandon' ? 'selected' : ''}>Abandon</option>
+                </select>
+            </td>
             <td>
                 <div class="actions-cell">
-                    <a href="mailto:${insc.email}" class="btn-action btn-mail" title="Envoyer un email">
-                        <i class="fa-solid fa-envelope"></i>
-                    </a>
-                    <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </a>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${checkBtn}
-                        <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription(${insc.id})" title="Supprimer">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
+                    <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
+                        <i class="fa-solid fa-certificate"></i>
+                    </button>
+                    ${isDashboard ? `<div style="display:flex;flex-direction:column;gap:6px;">${checkBtn}</div>` : ''}
+                    <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 </div>
             </td>
         </tr>`;
-    });
-    tbody.innerHTML = html;
+    }).join('');
 
-    renderPaginationControls('inscriptions-pagination', filteredInscriptions.length, currentInscPage, (newPage) => {
-        currentInscPage = newPage;
-        renderInscriptions();
-    });
+    if (paginationId) {
+        renderPaginationControls(paginationId, meta.totalItems, meta.currentPage, (newPage) => {
+            currentInscPage = newPage;
+            fetchInscriptions();
+        });
+    }
 }
 
 // 5. ACTIONS  
-
 async function marquerCommeLuMessage(id) {
     try {
         const response = await fetch(`http://localhost:3000/api/admin/messages/${id}/lu`, {
@@ -245,35 +287,9 @@ async function marquerCommeLuMessage(id) {
             if (msg) msg.statut = 'lu';
             updateMessageCount();
             renderMessages();
-        } else {
-            alert("Erreur lors du marquage du message.");
         }
     } catch (error) {
         console.error("Erreur PUT message lu:", error);
-        alert("Impossible de contacter le serveur.");
-    }
-}
-
-async function marquerCommeLuInscription(id) {
-    try {
-        const response = await fetch(`http://localhost:3000/api/admin/inscriptions/${id}/lu`, {
-            method: 'PUT',
-            headers: getAuthHeaders()
-
-        });
-        const result = await response.json();
-
-        if (result.success) {
-            const insc = allInscriptions.find(i => i.id === id);
-            if (insc) insc.statut = 'lu';
-            updateInscriptionCount();
-            renderInscriptions();
-        } else {
-            alert("Erreur lors du marquage de l'inscription.");
-        }
-    } catch (error) {
-        console.error("Erreur PUT inscription lu:", error);
-        alert("Impossible de contacter le serveur.");
     }
 }
 
@@ -290,12 +306,22 @@ async function supprimerMessage(id) {
         if (result.success) {
             allMessages = allMessages.filter(m => m.id !== id);
             filtrerMessages();
-        } else {
-            alert("Erreur lors de la suppression du message.");
         }
     } catch (error) {
         console.error("Erreur DELETE message:", error);
-        alert("Impossible de contacter le serveur.");
+    }
+}
+
+async function updateStatutEtudiant(id, nouveauStatut) {
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/etudiants/${id}/statut`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ statut_scolaire: nouveauStatut })
+        });
+        if (res.ok) fetchInscriptions(); 
+    } catch (err) {
+        alert("Erreur lors de la mise à jour du statut.");
     }
 }
 
@@ -309,21 +335,65 @@ async function supprimerInscription(id) {
         });
         const result = await response.json();
 
-        if (result.success) {
-            allInscriptions = allInscriptions.filter(i => i.id !== id);
-            filtrerInscriptions();
-        } else {
-            alert("Erreur lors de la suppression de l'inscription.");
-        }
+        if (result.success) fetchInscriptions(); 
     } catch (error) {
         console.error("Erreur DELETE inscription:", error);
-        alert("Impossible de contacter le serveur.");
+    }
+}
+
+async function marquerCommeLuInscription(id) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/admin/inscriptions/${id}/lu`, {
+            method: 'PUT',
+            headers: getAuthHeaders()
+        });
+        const result = await response.json();
+
+        if (result.success) fetchInscriptions(); 
+    } catch (error) {
+        console.error("Erreur PUT lu:", error);
+    }
+}
+
+async function ajouterEtudiantManuel(e) {
+    e.preventDefault();
+    
+    let rawTel = document.getElementById('ajout-tel').value.replace(/\D/g, ''); 
+    if (rawTel.startsWith('212')) rawTel = rawTel.substring(3); 
+    if (rawTel.startsWith('0')) rawTel = rawTel.substring(1);   
+    const finalTel = '+212' + rawTel; 
+
+    const payload = {
+        nom: document.getElementById('ajout-nom').value.trim(),
+        email: document.getElementById('ajout-email').value.trim() || 'Non renseigné',
+        telephone: finalTel, 
+        formation: document.getElementById('ajout-formation').value
+    };
+
+    try {
+        const res = await fetch('http://localhost:3000/api/admin/etudiants', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            closeAjoutModal();
+            fetchInscriptions(); 
+        } else {
+            alert(data.message || "Erreur serveur");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Erreur de connexion au serveur");
     }
 }
 
 // --- CERTIFICATE GENERATION ---
 async function genererAttestation(e) {
-    e.preventDefault(); // Stop the page refresh immediately
+    e.preventDefault(); 
 
     const nom = document.getElementById('nom-etudiant').value.trim();
     const formation = document.getElementById('formation-etudiant').value.trim();
@@ -345,7 +415,6 @@ async function genererAttestation(e) {
             resultDiv.style.border = '1px solid #bbf7d0';
             resultDiv.innerHTML = `Succès ! Le code pour <b>${nom}</b> est : <span style="font-size: 1.2rem; margin-left: 10px; padding: 4px 10px; background: white; border-radius: 4px; border: 1px dashed #166534;">${data.data.code_unique}</span>`;
             
-            // Clear inputs
             document.getElementById('nom-etudiant').value = ''; 
             document.getElementById('formation-etudiant').value = ''; 
         } else {
@@ -359,9 +428,50 @@ async function genererAttestation(e) {
         resultDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${error.message}`;
     }
 }
- 
-// 6. PAGINATION BUTTON BUILDER  
 
+// --- VIEW ROUTING & MODALS ---
+function switchView(viewName) {
+    document.getElementById('view-dashboard').classList.add('hidden');
+    document.getElementById('view-etudiants').classList.add('hidden');
+    document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+    const isDash = viewName === 'dashboard';
+    document.getElementById('nav-btn-dashboard').style.background = isDash ? 'var(--primary)' : 'transparent';
+    document.getElementById('nav-btn-dashboard').style.color = isDash ? 'white' : 'var(--primary)';
+    
+    document.getElementById('nav-btn-etudiants').style.background = !isDash ? 'var(--primary)' : 'transparent';
+    document.getElementById('nav-btn-etudiants').style.color = !isDash ? 'white' : 'var(--primary)';
+    
+    localStorage.setItem('active_admin_view', viewName);
+
+    if(viewName === 'etudiants') renderBaseEtudiants();
+}
+
+function prefillCertificate(nom, formation) {
+    document.getElementById('nom-etudiant').value = nom;
+    document.getElementById('formation-etudiant').value = formation;
+    
+    const resultDiv = document.getElementById('resultat-attestation');
+    resultDiv.style.display = 'none';
+    resultDiv.innerHTML = '';
+    
+    document.getElementById('cert-modal-overlay').classList.remove('hidden');
+}
+
+function closeCertModal() {
+    document.getElementById('cert-modal-overlay').classList.add('hidden');
+}
+
+function openAjoutModal() {
+    document.getElementById('ajout-modal-overlay').classList.remove('hidden');
+}
+
+function closeAjoutModal() {
+    document.getElementById('ajout-modal-overlay').classList.add('hidden');
+    document.getElementById('form-ajout-etudiant').reset();
+}
+ 
+// 6. PAGINATION BUILDER  
 function renderPaginationControls(containerId, totalItems, currentPage, onPageChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -392,6 +502,7 @@ function renderPaginationControls(containerId, totalItems, currentPage, onPageCh
     container.appendChild(nextBtn);
 }
 
+// INIT
 window.onload = () => {
     if (localStorage.getItem('admin_token')) {
         document.getElementById('login-overlay').classList.add('hidden');

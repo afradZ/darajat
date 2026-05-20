@@ -63,10 +63,15 @@ function fermerModal(modalId, event) {
 async function soumettreInscription(event) {
     event.preventDefault(); 
     
+    let rawTel = document.getElementById('insc-tel').value.replace(/\D/g, '');
+    if (rawTel.startsWith('212')) rawTel = rawTel.substring(3);
+    if (rawTel.startsWith('0')) rawTel = rawTel.substring(1);
+    const finalTel = '+212' + rawTel;
+
     const formData = {
-        nom: document.querySelector('#modal-inscription input[type="text"]').value,
-        email: document.querySelector('#modal-inscription input[type="email"]').value,
-        telephone: document.querySelector('#modal-inscription input[type="tel"]').value,
+        nom: document.querySelector('#modal-inscription input[type="text"]').value.trim(),
+        email: document.querySelector('#modal-inscription input[type="email"]').value.trim(),
+        telephone: finalTel,
         formation: document.getElementById('formationSelect').value
     };
 
@@ -82,13 +87,12 @@ async function soumettreInscription(event) {
         if(data.success) {
             alert('Inscription réussie pour : ' + formData.formation + ' !');
             fermerModal('modal-inscription');
-            // Optionnel : Vider le formulaire après succès
             document.querySelector('#modal-inscription form').reset();
         } else {
             alert("Une erreur s'est produite lors de l'inscription.");
         }
     } catch (error) {
-        console.error("Erreur de connexion au serveur:", error);
+        console.error("Erreur de connexion:", error);
         alert("Impossible de contacter le serveur.");
     }
 }

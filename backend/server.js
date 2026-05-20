@@ -79,8 +79,33 @@ app.post('/api/admin/attestations', authenticateToken, async (req, res) => {
         const { nom_etudiant, formation } = req.body;
         if (!nom_etudiant || !formation) return res.status(400).json({ success: false, message: "Données incomplètes." });
 
+        // 1. Verify student exists
+        const checkStudent = await pool.query(
+            'SELECT id FROM inscriptions WHERE nom_complet = $1 AND formation = $2',
+            [nom_etudiant, formation]
+        );
+
+        if (checkStudent.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "Étudiant non trouvé dans cette formation." });
+        }
+
+        // 2. Check for an existing certificate to prevent duplicates
+        const existingCert = await pool.query(
+            'SELECT * FROM attestations WHERE nom_etudiant = $1 AND formation = $2',
+            [nom_etudiant, formation]
+        );
+
+        if (existingCert.rows.length > 0) {
+            return res.status(200).json({ 
+                success: true, 
+                message: "Code existant récupéré.",
+                data: existingCert.rows[0] 
+            });
+        }
+
+        // 3. Generate new if none exists
         const year = new Date().getFullYear();
-        const randomHex = crypto.randomBytes(3).toString('hex').toUpperCase();
+        const randomHex = require('crypto').randomBytes(3).toString('hex').toUpperCase();
         const codeUnique = `DAR-${year}-${randomHex}`;
 
         const result = await pool.query(
@@ -92,16 +117,6 @@ app.post('/api/admin/attestations', authenticateToken, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: "Erreur serveur" });
-    }
-});
-
-app.put('/api/admin/attestations/:id/invalider', authenticateToken, async (req, res) => {
-    try {
-        await pool.query('UPDATE attestations SET est_valide = FALSE WHERE id = $1', [req.params.id]);
-        res.json({ success: true, message: "Attestation révoquée." });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false });
     }
 });
 
@@ -139,13 +154,60 @@ app.get('/api/admin/messages', authenticateToken, async (req, res) => {
 });
 
 // Endpoint E: Récupérer toutes les inscriptions (Admin)
+// GET: Récupérer les inscriptions avec pagination et filtres serveur
 app.get('/api/admin/inscriptions', authenticateToken, async (req, res) => {
     try {
-        // Replace 'inscriptions' with your actual table name if it is different
-        const result = await pool.query('SELECT * FROM inscriptions ORDER BY id DESC');
-        res.json({ success: true, data: result.rows });
+        const { page = 1, limit = 5, search = '', status = 'all', formation = 'all' } = req.query;
+        const offset = (page - 1) * limit;
+
+        let baseQuery = 'FROM inscriptions WHERE 1=1';
+        const params = [];
+        let paramIndex = 1;
+
+        // Dynamic filter construction
+        if (search) {
+            baseQuery += ` AND (nom_complet ILIKE $${paramIndex} OR formation ILIKE $${paramIndex})`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+        if (status !== 'all') {
+            // Adjust to match DB default fallback if null
+            baseQuery += ` AND COALESCE(statut_scolaire, 'En cours') = $${paramIndex}`;
+            params.push(status);
+            paramIndex++;
+        }
+        if (formation !== 'all') {
+            baseQuery += ` AND formation = $${paramIndex}`;
+            params.push(formation);
+            paramIndex++;
+        }
+
+        // 1. Get total count for the pagination UI
+        const countRes = await pool.query(`SELECT COUNT(*) ${baseQuery}`, params);
+        const totalItems = parseInt(countRes.rows[0].count);
+
+        // NEW: Get strictly the unread count for the dashboard badge
+        const unreadRes = await pool.query(`SELECT COUNT(*) ${baseQuery} AND (statut IS NULL OR statut != 'lu')`, params);
+        const unreadItems = parseInt(unreadRes.rows[0].count);
+
+        // 2. Get the specific chunk of data
+        const dataRes = await pool.query(
+            `SELECT * ${baseQuery} ORDER BY nom_complet ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`, 
+            [...params, limit, offset]
+        );
+
+        res.json({
+            success: true,
+            data: dataRes.rows,
+            meta: {
+                totalItems,
+                unreadItems, // <-- We now send this to the frontend
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalItems / limit)
+            }
+        });
     } catch (err) {
-        console.error("🚨 Erreur lecture inscriptions:", err);
+        console.error("Erreur pagination:", err);
         res.status(500).json({ success: false, message: "Erreur serveur" });
     }
 });
@@ -223,6 +285,35 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Endpoint K: Mettre à jour le statut scolaire d'un étudiant
+app.put('/api/admin/etudiants/:id/statut', authenticateToken, async (req, res) => {
+    try {
+        const { statut_scolaire } = req.body;
+        await pool.query(
+            'UPDATE inscriptions SET statut_scolaire = $1 WHERE id = $2',
+            [statut_scolaire, req.params.id]
+        );
+        res.json({ success: true, message: "Statut mis à jour." });
+    } catch (err) {
+        console.error("Erreur maj statut:", err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Endpoint M: Ajouter un étudiant manuellement (Admin)
+app.post('/api/admin/etudiants', authenticateToken, async (req, res) => {
+    try {
+        const { nom, email, telephone, formation } = req.body;
+        const result = await pool.query(
+            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, statut_scolaire) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [nom, email, telephone, formation, 'En cours']
+        );
+        res.status(201).json({ success: true, data: result.rows[0] });
+    } catch (err) {
+        console.error("Erreur ajout manuel:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur." });
+    }
+});
 
 // 3. Start the server
 const PORT = 3000;
