@@ -1,0 +1,49 @@
+/* --- CERTIFICATE PRINT STYLES --- */
+.certificate-container {
+    border: 15px solid #1e293b;
+    padding: 60px;
+    text-align: center;
+    background: white;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.certificate-container::before {
+    content: '';
+    position: absolute;
+    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border: 2px solid #cbd5e1;
+}
+
+@media print {
+    /* 1. Turn off visibility for EVERYTHING */
+    body * {
+        visibility: hidden !important;
+    }
+    
+    /* 2. Turn visibility back on ONLY for the certificate */
+    #print-section, #print-section * {
+        visibility: visible !important;
+    }
+    
+    /* 3. Force the certificate to the top left corner */
+    #print-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Force landscape A4 */
+    @page {
+        size: A4 landscape;
+        margin: 0;
+    }
+    
+    body {
+        background: white;
+    }
+}

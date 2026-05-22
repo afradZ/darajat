@@ -228,6 +228,37 @@
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <div id="print-section" style="display: none;">
+        <div class="certificate-container">
+            <div class="cert-header">
+                <h1 style="color: #1e293b; font-size: 3rem; margin: 0; font-family: serif;">Attestation de Réussite</h1>
+                <p style="color: #64748b; font-size: 1.2rem; margin-top: 10px;">Centre de Formation Darajat</p>
+            </div>
+            
+            <div class="cert-body">
+                <p style="font-size: 1.2rem; color: #475569;">Nous soussignés, certifions que</p>
+                <h2 id="cert-print-nom" style="font-size: 2.5rem; color: #0f172a; margin: 20px 0; border-bottom: 2px solid #cbd5e1; display: inline-block; padding: 0 40px;">Nom de l'étudiant</h2>
+                <p style="font-size: 1.2rem; color: #475569;">a suivi et validé avec succès la formation :</p>
+                <h3 id="cert-print-formation" style="font-size: 1.8rem; color: #3b82f6; margin: 20px 0;">Nom de la formation</h3>
+            </div>
+
+            <div class="cert-footer" style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px;">
+                <div style="text-align: left;">
+                    <p style="margin: 0; color: #64748b;">Code de vérification :</p>
+                    <p id="cert-print-code" style="font-family: monospace; font-size: 1.2rem; font-weight: bold; margin: 5px 0 0 0;">DAR-XXXX-XXXX</p>
+                </div>
+                <div style="text-align: center;">
+                    <p id="cert-print-date" style="margin: 0 0 10px 0; color: #64748b;">Fait le : 01/01/2026</p>
+                    <div style="width: 200px; border-top: 1px solid #1e293b; padding-top: 10px;">
+                        <b>Le Directeur</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/render.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
