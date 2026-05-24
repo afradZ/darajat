@@ -69,7 +69,7 @@ async function soumettreInscription(event) {
     };
 
     try {
-        const res = await fetch('/api/inscription', {
+        const res = await fetch('http://localhost:3000/api/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -77,7 +77,7 @@ async function soumettreInscription(event) {
         const data = await res.json();
 
         if (data.success) {
-            alert(`Inscription réussie pour : ${formation} !`);
+            alert(`Inscription réussie pour : ${formation} ! Veuillez vérifier votre dossier Spam ou Courrier indésirable pour la brochure.`);
             fermerModal('modal-inscription');
             document.querySelector('#modal-inscription form').reset();
         } else throw new Error();
@@ -139,7 +139,7 @@ async function envoyerMessage(event) {
     };
 
     try {
-        const res = await fetch('/api/contact', {
+        const res = await fetch('http://localhost:3000/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
