@@ -79,7 +79,7 @@ function closeAjoutModal() {
 }
 
 function lancerImpression(nom, formation, code) {
-    // 1. Fill the hidden template with real data
+    // Fill the hidden template with real data
     document.getElementById('cert-print-nom').innerText = nom;
     document.getElementById('cert-print-formation').innerText = formation;
     document.getElementById('cert-print-code').innerText = code;
@@ -87,7 +87,7 @@ function lancerImpression(nom, formation, code) {
     const today = new Date().toLocaleDateString('fr-FR');
     document.getElementById('cert-print-date').innerText = `Fait le : ${today}`;
 
-    // 2. Trigger the browser's print dialog
+    // Trigger the browser's print dialog
     window.print();
 }
 

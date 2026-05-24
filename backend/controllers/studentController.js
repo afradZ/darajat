@@ -3,30 +3,111 @@ const crypto = require('crypto');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 // --- PUBLIC ROUTES ---
+// 1. The Aggressive Normalizer
+const normalizeKey = (str) => {
+    if (!str) return '';
+    return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+};
+
+
+const brochureMap = {
+    'designgraphiqueuiux': {
+        filename: 'Programme_UI_UX.pdf',
+        path: path.join(__dirname, '../assets/brochures/ui-ux.pdf')
+    },
+    'developpementwebingenierielogicielle': {
+        filename: 'Programme_Dev_Web.pdf',
+        path: path.join(__dirname, '../assets/brochures/dev-web.pdf')
+    },
+    'marketingdigitalstrategie': {
+        filename: 'Programme_Marketing.pdf',
+        path: path.join(__dirname, '../assets/brochures/marketing.pdf')
+    },
+    'pedagogiemoderneetappliquee': {
+        filename: 'Programme_Pedagogie_Moderne.pdf',
+        path: path.join(__dirname, '../assets/brochures/pedagogie-moderne.pdf')
+    },
+    'psychologiedelenfantetdeladolescent': {
+        filename: 'Programme_Psychologie_Enfant.pdf',
+        path: path.join(__dirname, '../assets/brochures/psychologie-enfant.pdf')
+    },
+    'methodologiesdesoutienscolaire': {
+        filename: 'Programme_Soutien_Scolaire.pdf',
+        path: path.join(__dirname, '../assets/brochures/soutien-scolaire.pdf')
+    }
+};
+
 exports.registerPublic = async (req, res) => {
     try {
         const { nom, email, telephone, formation } = req.body;
         
+        console.log(`--- NOUVELLE INSCRIPTION ---`);
+        console.log(`Formation reçue du frontend : "${formation}"`);
+
+        // Save to DB
         const result = await pool.query(
             'INSERT INTO inscriptions (nom_complet, email, telephone, formation) VALUES ($1, $2, $3, $4) RETURNING *',
             [nom, email, telephone, formation]
         );
         
+        // Respond immediately
         res.status(201).json({ success: true, message: "Inscription réussie !", data: result.rows[0] });
+
+        // Setup Mailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+        
+        const mailOptions = {
+            from: `"Centre Darajat" <${process.env.EMAIL_USER}>`,
+            to: email, 
+            subject: `Confirmation d'inscription : ${formation}`,
+            text: `Bonjour ${nom},\n\nNous confirmons votre pré-inscription pour : ${formation}. Notre équipe vous contactera au ${telephone}.`,
+            html: `
+                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px;">
+                    <h2 style="color: #1e293b;">Bienvenue à Darajat !</h2>
+                    <p>Bonjour <strong>${nom}</strong>,</p>
+                    <p>Nous confirmons la réception de votre pré-inscription pour la formation : <strong style="color: #2563eb;">${formation}</strong>.</p>
+                    <p>Vous trouverez ci-joint la brochure détaillée. Notre équipe vous contactera très prochainement au <strong>${telephone}</strong> pour finaliser votre dossier.</p>
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                    <p style="color: #475569; font-size: 0.9em;">Ceci est un message automatique, merci de ne pas y répondre.</p>
+                </div>
+            `
+        };
+
+        const formationKey = normalizeKey(formation);
+        console.log(`Clé normalisée pour la recherche : "${formationKey}"`);
+
+        // Attach the brochure
+        if (brochureMap[formationKey]) {
+            mailOptions.attachments = [brochureMap[formationKey]];
+            console.log(` PDF Attaché : ${brochureMap[formationKey].filename}`);
+        } else {
+            console.log(` ALARME: Échec du mapping. Le frontend a envoyé : "${formation}"`);
+        }
+
+        // Send Email
+        transporter.sendMail(mailOptions).then(info => {
+             console.log(" Email envoyé avec succès aux étudiants. ID:", info.messageId);
+        }).catch(err => {
+            console.error("Erreur d'envoi d'email de confirmation étudiant:", err);
+        });
         
     } catch (err) {
-        // 23505 is the universal PostgreSQL code for a UNIQUE constraint violation
         if (err.code === '23505') {
-            return res.status(409).json({ 
-                success: false, 
-                message: "Ce numéro de téléphone est déjà inscrit à cette formation." 
-            });
+            return res.status(409).json({ success: false, message: "Ce numéro de téléphone est déjà inscrit à cette formation." });
         }
-        
         console.error(err.message);
-        res.status(500).json({ success: false, message: "Erreur lors de l'inscription." });
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: "Erreur lors de l'inscription." });
+        }
     }
 };
 
@@ -176,18 +257,15 @@ exports.downloadCertificatePdf = async (req, res) => {
         const certData = result.rows[0];
         const dateStr = new Date(certData.date_emission).toLocaleDateString('fr-FR');
 
-        // 1. Create a fresh document
         const pdfDoc = await PDFDocument.create();
         
-        // 2. Load the PNG image instead of a PDF
         const templatePath = path.join(__dirname, '../assets/template.png');
         const imageBytes = fs.readFileSync(templatePath);
         const bgImage = await pdfDoc.embedPng(imageBytes); // Use .embedJpg() if you exported a JPG
         
-        // 3. Create a standard A4 Landscape page (841.89 x 595.28 points)
+        // Create a standard A4 Landscape page
         const page = pdfDoc.addPage([841.89, 595.28]);
         
-        // 4. Draw the Canva image to perfectly fill the entire page background
         page.drawImage(bgImage, {
             x: 0,
             y: 0,
@@ -198,7 +276,6 @@ exports.downloadCertificatePdf = async (req, res) => {
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         const fontNormal = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-        // 5. Stamp the text on top of the image
         page.drawText(certData.nom_etudiant, { x: 300, y: 330, size: 24, font: fontBold, color: rgb(0, 0, 0) });
         page.drawText(certData.formation, { x: 250, y: 230, size: 20, font: fontBold, color: rgb(0.2, 0.6, 0.3) });
         page.drawText(`Fait le : ${dateStr}`, { x: 600, y: 100, size: 12, font: fontNormal, color: rgb(0.1, 0.1, 0.1) });
