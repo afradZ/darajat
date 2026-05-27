@@ -1,12 +1,8 @@
 const { Pool } = require('pg');
-require('dotenv').config();
 
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_P5bhB1FCeDos@ep-floral-forest-abnxfdkd.eu-west-2.aws.neon.tech/neondb?sslmode=require',
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 module.exports = pool;
