@@ -4,7 +4,6 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// 1. Import your isolated DB connection and modular routes
 const pool = require('./config/db'); 
 const messageRoutes = require('./routes/messageRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -13,11 +12,14 @@ const app = express();
 app.use(cors());
 app.use(express.json()); 
 
-// 2. Mount the modular routes
+
 app.use('/api', messageRoutes);
 app.use('/api', studentRoutes);
 
-// 3. Keep Login here (for now)
+app.get('/', (req, res) => {
+    res.json({ message: "Darajat API is live." });
+});
+
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -48,7 +50,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// 4. Start Server
+// Start Server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Serveur Darajat en ligne sur http://localhost:${PORT}`);
