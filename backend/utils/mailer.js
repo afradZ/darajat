@@ -1,13 +1,20 @@
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD // Ensure this is an App Password if using Gmail
-    },
-
-    connectionTimeout: 20000, 
-    greetingTimeout: 20000,
-    socketTimeout: 20000
-});
+// Example replacing your nodemailer logic
+const sendEmail = async (studentEmail, pdfAttachment) => {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            'accept': 'application/json',
+            'api-key': process.env.BREVO_API_KEY, 
+            'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            sender: { email: "your-verified-email@gmail.com", name: "Darajat Admin" },
+            to: [{ email: studentEmail }],
+            subject: "Confirmation d'inscription",
+            textContent: "Votre inscription est confirmée. Voir le PDF ci-joint.",
+            
+        })
+    });
+    
+    if (!response.ok) throw new Error('Failed to send HTTP email');
+};
