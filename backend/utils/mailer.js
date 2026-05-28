@@ -8,7 +8,7 @@ const sendEmail = async (studentEmail, pdfAttachment) => {
             'content-type': 'application/json'
         },
         body: JSON.stringify({
-            sender: { email: "your-verified-email@gmail.com", name: "Darajat Admin" },
+            sender: { email: "contact.testdarajat@gmail.com", name: "Darajat Admin" },
             to: [{ email: studentEmail }],
             subject: "Confirmation d'inscription",
             textContent: "Votre inscription est confirmée. Voir le PDF ci-joint.",
