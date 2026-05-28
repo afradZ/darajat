@@ -139,7 +139,7 @@ async function envoyerMessage(event) {
     };
 
     try {
-        const res = await fetch('https://darajat-api.onrender.com/api/contact', {
+        const res = await fetch('https://darajat-sq11.onrender.com/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
