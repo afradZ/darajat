@@ -13,7 +13,7 @@ async function fetchDashboardData() {
 
     const headers = getAuthHeaders();
 
-    const msgResponse = await fetch('http://localhost:3000/api/admin/messages', { headers });
+    const msgResponse = await fetch('https://darajat-sq11.onrender.com/api/admin/messages', { headers });
     if (msgResponse.status === 401 || msgResponse.status === 403) return handleLogout();
     const msgResult = await msgResponse.json();
     if (msgResult.success) {
@@ -36,7 +36,7 @@ async function fetchInscriptions() {
     const formation = document.getElementById('filter-formation')?.value || 'all';
 
     try {
-        const res = await fetch(`http://localhost:3000/api/admin/inscriptions?page=${currentInscPage}&limit=${rowsPerPage}&search=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&formation=${encodeURIComponent(formation)}`, {
+        const res = await fetch(`https://darajat-sq11.onrender.com/api/admin/inscriptions?page=${currentInscPage}&limit=${rowsPerPage}&search=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&formation=${encodeURIComponent(formation)}`, {
             headers: getAuthHeaders()
         });
         
@@ -53,7 +53,7 @@ async function fetchInscriptions() {
 
 async function marquerCommeLuMessage(id) {
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/messages/${id}/lu`, {
+        const response = await fetch(`https://darajat-sq11.onrender.com/api/admin/messages/${id}/lu`, {
             method: 'PUT', headers: getAuthHeaders()
         });
         const result = await response.json();
@@ -70,7 +70,7 @@ async function marquerCommeLuMessage(id) {
 async function supprimerMessage(id) {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce message ?")) return;
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/messages/${id}`, {
+        const response = await fetch(`https://darajat-sq11.onrender.com/api/admin/messages/${id}`, {
             method: 'DELETE', headers: getAuthHeaders()
         });
         const result = await response.json();
@@ -83,7 +83,7 @@ async function supprimerMessage(id) {
 
 async function updateStatutEtudiant(id, nouveauStatut) {
     try {
-        const res = await fetch(`http://localhost:3000/api/admin/etudiants/${id}/statut`, {
+        const res = await fetch(`https://darajat-sq11.onrender.com/api/admin/etudiants/${id}/statut`, {
             method: 'PUT', headers: getAuthHeaders(),
             body: JSON.stringify({ statut_scolaire: nouveauStatut })
         });
@@ -94,7 +94,7 @@ async function updateStatutEtudiant(id, nouveauStatut) {
 async function supprimerInscription(id) {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette inscription ?")) return;
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/inscriptions/${id}`, {
+        const response = await fetch(`https://darajat-sq11.onrender.com/api/admin/inscriptions/${id}`, {
             method: 'DELETE', headers: getAuthHeaders()
         });
         const result = await response.json();
@@ -104,7 +104,7 @@ async function supprimerInscription(id) {
 
 async function marquerCommeLuInscription(id) {
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/inscriptions/${id}/lu`, {
+        const response = await fetch(`https://darajat-sq11.onrender.com/api/admin/inscriptions/${id}/lu`, {
             method: 'PUT', headers: getAuthHeaders()
         });
         const result = await response.json();
@@ -127,7 +127,7 @@ async function ajouterEtudiantManuel(e) {
     };
 
     try {
-        const res = await fetch('http://localhost:3000/api/admin/etudiants', {
+        const res = await fetch('https://darajat-sq11.onrender.com/api/admin/etudiants', {
             method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -148,7 +148,7 @@ async function genererAttestation(e) {
     const resultDiv = document.getElementById('resultat-attestation');
 
     try {
-        const response = await fetch('http://localhost:3000/api/admin/attestations', {
+        const response = await fetch('https://darajat-sq11.onrender.com/api/admin/attestations', {
             method: 'POST', headers: getAuthHeaders(),
             body: JSON.stringify({ nom_etudiant: nom, formation: formation })
         });
@@ -188,7 +188,7 @@ async function genererAttestation(e) {
 
 async function telechargerPDF(code) {
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/attestations/download/${code}`, {
+        const response = await fetch(`https://darajat-sq11.onrender.com/api/admin/attestations/download/${code}`, {
             method: 'GET',
             headers: getAuthHeaders() // We need the JWT token to access this route
         });
