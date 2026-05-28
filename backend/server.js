@@ -9,7 +9,11 @@ const messageRoutes = require('./routes/messageRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: 'https://darajat-1mu6gder2-afradzs-projects.vercel.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json()); 
 
 
@@ -51,8 +55,8 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Start Server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Serveur Darajat en ligne sur http://localhost:${PORT}`);
+    console.log(`Serveur Darajat en ligne sur le port ${PORT}`);
 });
 
