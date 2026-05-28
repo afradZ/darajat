@@ -57,14 +57,6 @@ app.post('/api/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/api/debug-users', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT username, password_hash FROM users');
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 app.listen(PORT, () => {
     console.log(`Serveur Darajat en ligne sur le port ${PORT}`);
 });
