@@ -69,7 +69,7 @@ async function soumettreInscription(event) {
     };
 
     try {
-        const res = await fetch('http://localhost:3000/api/inscription', {
+        const res = await fetch('https://darajat-api.onrender.com/api/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -139,7 +139,7 @@ async function envoyerMessage(event) {
     };
 
     try {
-        const res = await fetch('http://localhost:3000/api/contact', {
+        const res = await fetch('https://darajat-api.onrender.com/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
