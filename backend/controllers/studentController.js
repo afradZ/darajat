@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fs = require('fs');
 const path = require('path');
-const nodemailer = require('nodemailer');
 
 // --- PUBLIC ROUTES ---
 // 1. The Aggressive Normalizer
@@ -56,49 +55,74 @@ exports.registerPublic = async (req, res) => {
         // Respond immediately
         res.status(201).json({ success: true, message: "Inscription réussie !", data: result.rows[0] });
 
-        // Setup Mailer
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-        
-        const mailOptions = {
-            from: `"Centre Darajat" <${process.env.EMAIL_USER}>`,
-            to: email, 
-            subject: `Confirmation d'inscription : ${formation}`,
-            text: `Bonjour ${nom},\n\nNous confirmons votre pré-inscription pour : ${formation}. Notre équipe vous contactera au ${telephone}.`,
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px;">
-                    <h2 style="color: #1e293b;">Bienvenue à Darajat !</h2>
-                    <p>Bonjour <strong>${nom}</strong>,</p>
-                    <p>Nous confirmons la réception de votre pré-inscription pour la formation : <strong style="color: #2563eb;">${formation}</strong>.</p>
-                    <p>Vous trouverez ci-joint la brochure détaillée. Notre équipe vous contactera très prochainement au <strong>${telephone}</strong> pour finaliser votre dossier.</p>
-                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-                    <p style="color: #475569; font-size: 0.9em;">Ceci est un message automatique, merci de ne pas y répondre.</p>
-                </div>
-            `
-        };
-
         const formationKey = normalizeKey(formation);
         console.log(`Clé normalisée pour la recherche : "${formationKey}"`);
 
-        // Attach the brochure
+        let attachmentArray = [];
+
+        // Attach the brochure if it exists
         if (brochureMap[formationKey]) {
-            mailOptions.attachments = [brochureMap[formationKey]];
-            console.log(` PDF Attaché : ${brochureMap[formationKey].filename}`);
+            const pdfPath = brochureMap[formationKey].path;
+            const pdfFilename = brochureMap[formationKey].filename;
+            
+            try {
+                // Read file as buffer and convert to base64
+                const pdfBuffer = fs.readFileSync(pdfPath);
+                const base64Pdf = pdfBuffer.toString('base64');
+                
+                attachmentArray = [
+                    {
+                        content: base64Pdf,
+                        name: pdfFilename
+                    }
+                ];
+                console.log(` PDF Attaché : ${pdfFilename}`);
+            } catch (fsError) {
+                console.log(` ALARME: Impossible de lire le fichier PDF: ${pdfPath}`);
+            }
         } else {
             console.log(` ALARME: Échec du mapping. Le frontend a envoyé : "${formation}"`);
         }
 
-        // Send Email
-        transporter.sendMail(mailOptions).then(info => {
-             console.log(" Email envoyé avec succès aux étudiants. ID:", info.messageId);
-        }).catch(err => {
-            console.error("Erreur d'envoi d'email de confirmation étudiant:", err);
-        });
+        // Send Email via Brevo HTTP API
+        try {
+            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': process.env.BREVO_API_KEY, 
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { 
+                        email: process.env.BREVO_SENDER_EMAIL, // Add this to Render!
+                        name: "Centre Darajat" 
+                    },
+                    to: [{ email: email }],
+                    subject: `Confirmation d'inscription : ${formation}`,
+                    htmlContent: `
+                        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px;">
+                            <h2 style="color: #1e293b;">Bienvenue à Darajat !</h2>
+                            <p>Bonjour <strong>${nom}</strong>,</p>
+                            <p>Nous confirmons la réception de votre pré-inscription pour la formation : <strong style="color: #2563eb;">${formation}</strong>.</p>
+                            <p>Vous trouverez ci-joint la brochure détaillée. Notre équipe vous contactera très prochainement au <strong>${telephone}</strong> pour finaliser votre dossier.</p>
+                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+                            <p style="color: #475569; font-size: 0.9em;">Ceci est un message automatique, merci de ne pas y répondre.</p>
+                        </div>
+                    `,
+                    attachment: attachmentArray.length > 0 ? attachmentArray : undefined
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Brevo API failed: ${JSON.stringify(errorData)}`);
+            }
+
+            console.log("Email envoyé avec succès via Brevo HTTP API.");
+        } catch (emailError) {
+            console.error("Erreur d'envoi d'email de confirmation étudiant:", emailError);
+        }
         
     } catch (err) {
         if (err.code === '23505') {
