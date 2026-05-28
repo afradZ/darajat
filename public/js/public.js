@@ -11,7 +11,7 @@ const formationsData = {
 
 let categorieActuelle = "";
 
-// --- UTILS ---
+// UTILS 
 const escapeHTML = (str) => str ? str.toString().replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]) : '';
 
 const showOverlay = (id) => {
@@ -69,7 +69,7 @@ async function soumettreInscription(event) {
     };
 
     try {
-        const res = await fetch('https://darajat-api.onrender.com/api/inscription', {
+        const res = await fetch('https://darajat-sq11.onrender.com/api/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -100,7 +100,7 @@ async function verifierAttestation() {
     resultDiv.innerHTML = '<p style="text-align: center; color: #64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Vérification en cours...</p>';
 
     try {
-        const res = await fetch('/api/verification', {
+        const res = await fetch('https://darajat-sq11.onrender.com/api/verification', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code })
