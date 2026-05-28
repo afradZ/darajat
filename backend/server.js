@@ -10,6 +10,9 @@ const studentRoutes = require('./routes/studentRoutes');
 
 const app = express();
 
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
