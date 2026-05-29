@@ -15,6 +15,24 @@ const formatMailtoParams = (email) => {
     return encodeURIComponent(email.trim()).replace(/%40/g, '@');
 };
 
+window.triggerMailApp = function(rawEmail) {
+    if (!rawEmail) return;
+    
+    // 1. Attempt the protocol launch via synthetic click
+    const link = document.createElement('a');
+    link.href = `mailto:${formatMailtoParams(rawEmail)}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 2. Fallback UX: Copy to clipboard automatically
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(rawEmail).then(() => {
+            console.log(`Fallback: ${rawEmail} copié dans le presse-papiers.`);
+        }).catch(err => console.error("Erreur presse-papiers:", err));
+    }
+}
+
 function renderMessages() {
     const tbody = document.getElementById('messages-body');
     const emptyState = document.getElementById('empty-messages');
