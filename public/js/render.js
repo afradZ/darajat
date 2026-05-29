@@ -130,7 +130,7 @@ function renderInscriptions(dataChunk, meta) {
                         <i class="fa-brands fa-whatsapp"></i>
                     </a>
                     
-                    <a href="mailto:${encodeURIComponent(etu.email)}" target="_blank" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${encodeURIComponent(etu.email || '')}" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
 
