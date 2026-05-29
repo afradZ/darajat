@@ -10,6 +10,11 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
+const formatMailtoParams = (email) => {
+    if (!email) return '';
+    return encodeURIComponent(email.trim()).replace(/%40/g, '@');
+};
+
 function renderMessages() {
     const tbody = document.getElementById('messages-body');
     const emptyState = document.getElementById('empty-messages');
@@ -45,7 +50,7 @@ function renderMessages() {
             <td>${escapeHTML(msg.message)}</td>
             <td>
                 <div class="actions-cell">
-                    <a href="mailto:${escapeHTML(msg.email)}" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${formatMailtoParams(msg.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
                     <div style="display:flex;flex-direction:column;gap:6px;">
@@ -130,7 +135,7 @@ function renderInscriptions(dataChunk, meta) {
                         <i class="fa-brands fa-whatsapp"></i>
                     </a>
                     
-                    <a href="mailto:${encodeURIComponent(etu.email || '')}" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${formatMailtoParams(etu.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
 
