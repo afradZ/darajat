@@ -126,11 +126,11 @@ function renderInscriptions(dataChunk, meta) {
             </td>
             <td>
                 <div class="actions-cell">
-                    <a href="mailto:${encodeURIComponent(etu.email)}" target="_blank" class="btn-action btn-mail" title="Envoyer un email">
-                        <i class="fa-solid fa-envelope"></i>
+                    <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp">
+                        <i class="fa-brands fa-whatsapp"></i>
                     </a>
                     
-                    <a href="mailto:${escapeHTML(etu.email)}" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${encodeURIComponent(etu.email)}" target="_blank" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
 
