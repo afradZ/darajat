@@ -130,11 +130,9 @@ function renderInscriptions(dataChunk, meta) {
                         <i class="fa-brands fa-whatsapp"></i>
                     </a>
                     
-                    <a href="mailto:${escapeHTML(msg.email || '')}" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${encodeURIComponent(etu.email || '')}" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${checkBtn}
 
                     ${!isDashboard ? `
                     <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
