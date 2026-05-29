@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
 
 const pool = require('./config/db'); 
 const messageRoutes = require('./routes/messageRoutes');
@@ -10,16 +13,34 @@ const studentRoutes = require('./routes/studentRoutes');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
+app.use(helmet());
+
 app.use(cors({
-    origin: '*',
+    origin: 'https://darajat-2yrzayxf9-afradzs-projects.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json()); 
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, 
+    max: 100, 
+    message: { success: false, message: "Trop de requêtes, veuillez réessayer plus tard." }
+});
+app.use('/api/', apiLimiter);
+
+const loginLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, 
+    max: 5 
+});
+app.use('/api/login', loginLimiter);
+
 
 app.use('/api', messageRoutes);
 app.use('/api', studentRoutes);
@@ -50,6 +71,7 @@ app.post('/api/login', async (req, res) => {
             process.env.JWT_SECRET, 
             { expiresIn: '12h' }
         );
+
 
         res.json({ success: true, token });
     } catch (error) {
