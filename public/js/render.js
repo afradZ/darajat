@@ -31,7 +31,7 @@ window.triggerMailApp = function(rawEmail) {
             console.log(`Fallback: ${rawEmail} copié dans le presse-papiers.`);
         }).catch(err => console.error("Erreur presse-papiers:", err));
     }
-}
+};
 
 function renderMessages() {
     const tbody = document.getElementById('messages-body');
