@@ -21,7 +21,21 @@ dns.setDefaultResultOrder('ipv4first');
 app.use(helmet());
 
 app.use(cors({
-    origin: 'https://darajat-2yrzayxf9-afradzs-projects.vercel.app',
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+
+        if (origin === 'https://darajat-lilac.vercel.app') {
+            return callback(null, true);
+        }
+
+        const isVercelPreview = /^https:\/\/darajat-[a-zA-Z0-9]+-afradzs-projects\.vercel\.app$/.test(origin);
+        
+        if (isVercelPreview) {
+            return callback(null, true);
+        }
+
+        return callback(new Error('Bloqué par CORS'), false);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
