@@ -133,10 +133,11 @@ function renderInscriptions(dataChunk, meta) {
                     <a href="mailto:${escapeHTML(etu.email)}" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
-
+                    ${!isDashboard ? `
                     <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
                         <i class="fa-solid fa-certificate"></i>
                     </button>
+                    ` : ''}
                     
                     ${isDashboard ? `<div style="display:flex;flex-direction:column;gap:6px;">${checkBtn}</div>` : ''}
                     
