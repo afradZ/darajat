@@ -121,4 +121,5 @@ window.onload = () => {
     }
     document.getElementById('search-msg')?.addEventListener('input', debounce(filtrerMessages, 300));
     document.getElementById('search-insc')?.addEventListener('input', debounce(filtrerInscriptions, 300));
+    document.getElementById('search-etudiants')?.addEventListener('input', debounce(filtrerBaseEtudiants, 300));
 };
