@@ -154,7 +154,7 @@ function renderInscriptions(dataChunk, meta) {
             </td>
             ${isDashboard ? `<td><span class="badge">${escapeHTML(etu.formation)}</span></td>` : `<td><small style="color:#64748b;">${escapeHTML(etu.telephone)}</small></td><td>${escapeHTML(etu.formation)}</td>`}
             <td>
-                <select onchange="handleStatusChange(this, '${etu.id}')" style="padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ${getStatusStyle(currentStatus)}">
+                <select onchange="updateStatutEtudiant('${etu.id}', this.value, this)" data-previous-value="${escapeHTML(currentStatus)}" style="padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ${getStatusStyle(currentStatus)}">
                     <option value="En cours" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'En cours' ? 'selected' : ''}>En cours</option>
                     <option value="Diplômé" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'Diplômé' ? 'selected' : ''}>Diplômé</option>
                     <option value="Abandon" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'Abandon' ? 'selected' : ''}>Abandon</option>

@@ -1,5 +1,3 @@
-// --- NETWORK & API CALLS ---
-
 function getAuthHeaders() {
     return {
         'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
@@ -81,14 +79,38 @@ async function supprimerMessage(id) {
     } catch (error) { console.error("Erreur DELETE message:", error); }
 }
 
-async function updateStatutEtudiant(id, nouveauStatut) {
+async function updateStatutEtudiant(id, nouveauStatut, selectElement) {
+    selectElement.disabled = true;
+    const previousValue = selectElement.dataset.previousValue || selectElement.value;
+
     try {
         const res = await fetch(`https://darajat-sq11.onrender.com/api/admin/etudiants/${id}/statut`, {
             method: 'PUT', headers: getAuthHeaders(),
             body: JSON.stringify({ statut_scolaire: nouveauStatut })
         });
-        if (res.ok) fetchInscriptions(); 
-    } catch (err) { alert("Erreur lors de la mise à jour du statut."); }
+
+        if (!res.ok) throw new Error('Server error');
+
+        const data = await res.json();
+        if (data.success) {
+            selectElement.dataset.previousValue = nouveauStatut;
+            applyStatusStyle(selectElement, nouveauStatut);
+        } else {
+            throw new Error(data.message || 'Update failed');
+        }
+    } catch (err) {
+        console.error("Erreur mise à jour statut:", err);
+        selectElement.value = previousValue;
+        applyStatusStyle(selectElement, previousValue);
+        alert("Erreur lors de la mise à jour du statut. La valeur a été restaurée.");
+    } finally {
+        selectElement.disabled = false;
+    }
+}
+
+function applyStatusStyle(selectElement, status) {
+    const baseStyle = 'padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ';
+    selectElement.style.cssText = baseStyle + getStatusStyle(status);
 }
 
 async function supprimerInscription(id) {
