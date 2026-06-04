@@ -1,5 +1,3 @@
-// --- RENDER & UI LOGIC ---
-
 function escapeHTML(str) {
     if (!str) return '';
     return str.toString()
@@ -15,17 +13,23 @@ const formatMailtoParams = (email) => {
     return encodeURIComponent(email.trim()).replace(/%40/g, '@');
 };
 
+const getStatusStyle = (status) => {
+    if (status === 'Diplômé') return 'background-color: #f0fdf4; color: #166534; border-color: #bbf7d0;';
+    if (status === 'Abandon') return 'background-color: #fef2f2; color: #991b1b; border-color: #fecaca;';
+    return 'background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;'; 
+};
+
 window.triggerMailApp = function(rawEmail) {
     if (!rawEmail) return;
     
-    // 1. Attempt the protocol launch via synthetic click
+    // Attempt the protocol launch via synthetic click
     const link = document.createElement('a');
     link.href = `mailto:${formatMailtoParams(rawEmail)}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // 2. Fallback UX: Copy to clipboard automatically
+    // Fallback UX: Copy to clipboard automatically
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(rawEmail).then(() => {
             console.log(`Fallback: ${rawEmail} copié dans le presse-papiers.`);
@@ -141,10 +145,10 @@ function renderInscriptions(dataChunk, meta) {
             </td>
             ${isDashboard ? `<td><span class="badge">${escapeHTML(etu.formation)}</span></td>` : `<td><small style="color:#64748b;">${escapeHTML(etu.telephone)}</small></td><td>${escapeHTML(etu.formation)}</td>`}
             <td>
-                <select onchange="updateStatutEtudiant('${etu.id}', this.value)" style="padding:4px; border-radius:4px; border:1px solid #cbd5e1; font-size:0.85rem;">
-                    <option value="En cours" ${currentStatus === 'En cours' ? 'selected' : ''}>En cours</option>
-                    <option value="Diplômé" ${currentStatus === 'Diplômé' ? 'selected' : ''}>Diplômé</option>
-                    <option value="Abandon" ${currentStatus === 'Abandon' ? 'selected' : ''}>Abandon</option>
+                <select onchange="updateStatutEtudiant('${etu.id}', this.value)" style="padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ${getStatusStyle(currentStatus)}">
+                    <option value="En cours" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'En cours' ? 'selected' : ''}>En cours</option>
+                    <option value="Diplômé" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'Diplômé' ? 'selected' : ''}>Diplômé</option>
+                    <option value="Abandon" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'Abandon' ? 'selected' : ''}>Abandon</option>
                 </select>
             </td>
             <td>
