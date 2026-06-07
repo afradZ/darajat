@@ -170,13 +170,9 @@ function renderInscriptions(dataChunk, meta) {
                         <i class="fa-solid fa-envelope"></i>
                     </a>
 
-                    ${!isDashboard ? `
                     <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
                         <i class="fa-solid fa-certificate"></i>
                     </button>
-                    ` : ''}
-                    
-                    ${isDashboard ? `<div style="display:flex;flex-direction:column;gap:6px;">${checkBtn}</div>` : ''}
                     
                     <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
                         <i class="fa-solid fa-trash-can"></i>
