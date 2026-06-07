@@ -79,7 +79,7 @@ function renderMessages() {
                 <small style="color:#64748b;">${escapeHTML(msg.email)}</small>
             </td>
             <td>${escapeHTML(msg.message)}</td>
-                        <td>
+            <td>
                 <div class="actions-cell">
                     <a href="mailto:${formatMailtoParams(etu.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
