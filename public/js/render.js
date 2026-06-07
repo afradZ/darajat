@@ -153,6 +153,7 @@ function renderInscriptions(dataChunk, meta) {
                 <small style="color:#64748b;">${escapeHTML(etu.email)}</small>
             </td>
             ${isDashboard ? `<td><span class="badge">${escapeHTML(etu.formation)}</span></td>` : `<td><small style="color:#64748b;">${escapeHTML(etu.telephone)}</small></td><td>${escapeHTML(etu.formation)}</td>`}
+            ${!isDashboard ? `
             <td>
                 <select onchange="updateStatutEtudiant('${etu.id}', this.value, this)" data-previous-value="${escapeHTML(currentStatus)}" style="padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ${getStatusStyle(currentStatus)}">
                     <option value="En cours" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'En cours' ? 'selected' : ''}>En cours</option>
@@ -160,8 +161,17 @@ function renderInscriptions(dataChunk, meta) {
                     <option value="Abandon" style="background:white; color:#334155; font-weight:normal;" ${currentStatus === 'Abandon' ? 'selected' : ''}>Abandon</option>
                 </select>
             </td>
+            ` : ''}
             <td>
                 <div class="actions-cell">
+                    ${isDashboard ? `
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${checkBtn}
+                        <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    ` : `
                     <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp">
                         <i class="fa-brands fa-whatsapp"></i>
                     </a>
@@ -177,6 +187,7 @@ function renderInscriptions(dataChunk, meta) {
                     <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
+                    `}
                 </div>
             </td>
         </tr>`;
