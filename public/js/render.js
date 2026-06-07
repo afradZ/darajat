@@ -19,26 +19,15 @@ const getStatusStyle = (status) => {
     return 'background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;'; 
 };
 
-window.handleStatusChange = function(selectElement, studentId) {
-    // Optimistic UI: Instantly inject the new color scheme
-    const baseStyle = 'padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ';
-    selectElement.style.cssText = baseStyle + getStatusStyle(selectElement.value);
-    
-    // Dispatch the API call in the background
-    updateStatutEtudiant(studentId, selectElement.value);
-};
-
 window.triggerMailApp = function(rawEmail) {
     if (!rawEmail) return;
     
-    // Attempt the protocol launch via synthetic click
     const link = document.createElement('a');
     link.href = `mailto:${formatMailtoParams(rawEmail)}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // Fallback UX: Copy to clipboard automatically
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(rawEmail).then(() => {
             console.log(`Fallback: ${rawEmail} copié dans le presse-papiers.`);
@@ -81,20 +70,12 @@ function renderMessages() {
             <td>${escapeHTML(msg.message)}</td>
             <td>
                 <div class="actions-cell">
-                    <a href="mailto:${formatMailtoParams(etu.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
+                    <a href="mailto:${formatMailtoParams(msg.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
                         <i class="fa-solid fa-envelope"></i>
                     </a>
-                    <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </a>
-                    ${!isDashboard ? `
-                    <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
-                        <i class="fa-solid fa-certificate"></i>
-                    </button>
-                    ` : ''}
                     <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${isDashboard ? checkBtn : ''}
-                        <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
+                        ${checkBtn}
+                        <button class="btn-action" style="background:#ef4444;" onclick="supprimerMessage('${msg.id}')" title="Supprimer">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
@@ -135,7 +116,6 @@ function renderInscriptions(dataChunk, meta) {
         const currentStatus = etu.statut_scolaire || 'En cours';
         const isNew = etu.statut !== 'lu';
         
-        // Double-escaped for JS function injection inside HTML
         const safeName = etu.nom_complet.replace(/\\/g, '\\\\').replace(/['’]/g, "\\'").replace(/"/g, "&quot;").replace(/</g, "&lt;");
         const safeFormation = etu.formation.replace(/\\/g, '\\\\').replace(/['’]/g, "\\'").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
@@ -172,30 +152,23 @@ function renderInscriptions(dataChunk, meta) {
             ` : ''}
             <td>
                 <div class="actions-cell">
-                    ${isDashboard ? `
+                    <a href="mailto:${formatMailtoParams(etu.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                    <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </a>
+                    ${!isDashboard ? `
+                    <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
+                        <i class="fa-solid fa-certificate"></i>
+                    </button>
+                    ` : ''}
                     <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${checkBtn}
+                        ${isDashboard ? checkBtn : ''}
                         <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
-                    ` : `
-                    <a href="https://wa.me/${telClean}" target="_blank" class="btn-action btn-wa" title="WhatsApp">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </a>
-                    
-                    <a href="mailto:${formatMailtoParams(etu.email)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-mail" title="Envoyer un email">
-                        <i class="fa-solid fa-envelope"></i>
-                    </a>
-
-                    <button class="btn-action" style="background:#f59e0b;" onclick="prefillCertificate('${safeName}', '${safeFormation}')" title="Créer Attestation">
-                        <i class="fa-solid fa-certificate"></i>
-                    </button>
-                    
-                    <button class="btn-action" style="background:#ef4444;" onclick="supprimerInscription('${etu.id}')" title="Supprimer">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                    `}
                 </div>
             </td>
         </tr>`;
