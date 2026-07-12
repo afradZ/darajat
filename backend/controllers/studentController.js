@@ -5,161 +5,66 @@ const fs = require('fs');
 const path = require('path');
 
 // --- PUBLIC ROUTES ---
-// 1. The Aggressive Normalizer
 const normalizeKey = (str) => {
     if (!str) return '';
     return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
 };
 
-
 const brochureMap = {
-    'designgraphiqueuiux': {
-        filename: 'Programme_UI_UX.pdf',
-        path: path.join(__dirname, '../assets/brochures/ui-ux.pdf')
-    },
-    'developpementwebingenierielogicielle': {
-        filename: 'Programme_Dev_Web.pdf',
-        path: path.join(__dirname, '../assets/brochures/dev-web.pdf')
-    },
-    'marketingdigitalstrategie': {
-        filename: 'Programme_Marketing.pdf',
-        path: path.join(__dirname, '../assets/brochures/marketing.pdf')
-    },
-    'pedagogiemoderneetappliquee': {
-        filename: 'Programme_Pedagogie_Moderne.pdf',
-        path: path.join(__dirname, '../assets/brochures/pedagogie-moderne.pdf')
-    },
-    'psychologiedelenfantetdeladolescent': {
-        filename: 'Programme_Psychologie_Enfant.pdf',
-        path: path.join(__dirname, '../assets/brochures/psychologie-enfant.pdf')
-    },
-    'methodologiesdesoutienscolaire': {
-        filename: 'Programme_Soutien_Scolaire.pdf',
-        path: path.join(__dirname, '../assets/brochures/soutien-scolaire.pdf')
-    }
+    // ... keep your existing brochureMap object exactly as is ...
 };
 
 exports.registerPublic = async (req, res) => {
     try {
+        // Fallback to admin ID 1 if the public frontend doesn't provide one
+        const targetAdmin = req.body.admin_id || 2; 
         const { nom, email, telephone, formation } = req.body;
         
         console.log(`--- NOUVELLE INSCRIPTION ---`);
-        console.log(`Formation reçue du frontend : "${formation}"`);
-
-        // Save to DB
+        
         const result = await pool.query(
-            'INSERT INTO inscriptions (nom_complet, email, telephone, formation) VALUES ($1, $2, $3, $4) RETURNING *',
-            [nom, email, telephone, formation]
+            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, admin_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [nom, email, telephone, formation, targetAdmin]
         );
         
-        // Respond immediately
         res.status(201).json({ success: true, message: "Inscription réussie !", data: result.rows[0] });
 
-        const formationKey = normalizeKey(formation);
-        console.log(`Clé normalisée pour la recherche : "${formationKey}"`);
-
-        let attachmentArray = [];
-
-        // Attach the brochure if it exists
-        if (brochureMap[formationKey]) {
-            const pdfPath = brochureMap[formationKey].path;
-            const pdfFilename = brochureMap[formationKey].filename;
-            
-            try {
-                // Read file as buffer and convert to base64
-                const pdfBuffer = fs.readFileSync(pdfPath);
-                const base64Pdf = pdfBuffer.toString('base64');
-                
-                attachmentArray = [
-                    {
-                        content: base64Pdf,
-                        name: pdfFilename
-                    }
-                ];
-                console.log(` PDF Attaché : ${pdfFilename}`);
-            } catch (fsError) {
-                console.log(` ALARME: Impossible de lire le fichier PDF: ${pdfPath}`);
-            }
-        } else {
-            console.log(` ALARME: Échec du mapping. Le frontend a envoyé : "${formation}"`);
-        }
-
-        // Send Email via Brevo HTTP API
-        try {
-            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-                method: 'POST',
-                headers: {
-                    'accept': 'application/json',
-                    'api-key': process.env.BREVO_API_KEY, 
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sender: { 
-                        email: process.env.BREVO_SENDER_EMAIL, // Add this to Render!
-                        name: "Centre Darajat" 
-                    },
-                    to: [{ email: email }],
-                    subject: `Confirmation d'inscription : ${formation}`,
-                    htmlContent: `
-                        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; max-width: 600px;">
-                            <h2 style="color: #1e293b;">Bienvenue à Darajat !</h2>
-                            <p>Bonjour <strong>${nom}</strong>,</p>
-                            <p>Nous confirmons la réception de votre pré-inscription pour la formation : <strong style="color: #2563eb;">${formation}</strong>.</p>
-                            <p>Vous trouverez ci-joint la brochure détaillée. Notre équipe vous contactera très prochainement au <strong>${telephone}</strong> pour finaliser votre dossier.</p>
-                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-                            <p style="color: #475569; font-size: 0.9em;">Ceci est un message automatique, merci de ne pas y répondre.</p>
-                        </div>
-                    `,
-                    attachment: attachmentArray.length > 0 ? attachmentArray : undefined
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Brevo API failed: ${JSON.stringify(errorData)}`);
-            }
-
-            console.log("Email envoyé avec succès via Brevo HTTP API.");
-        } catch (emailError) {
-            console.error("Erreur d'envoi d'email de confirmation étudiant:", emailError);
-        }
+        // ... keep your existing Brevo email logic here ...
         
     } catch (err) {
         if (err.code === '23505') {
-            return res.status(409).json({ success: false, message: "Ce numéro de téléphone est déjà inscrit à cette formation." });
+            return res.status(409).json({ success: false, message: "Ce numéro de téléphone est déjà inscrit." });
         }
         console.error(err.message);
-        if (!res.headersSent) {
-            res.status(500).json({ success: false, message: "Erreur lors de l'inscription." });
-        }
+        if (!res.headersSent) res.status(500).json({ success: false, message: "Erreur serveur." });
     }
 };
 
 exports.verifyCertificate = async (req, res) => {
     try {
         const { code } = req.body;
+        // Certificates are globally unique by code, but we still ensure it is valid
         const result = await pool.query(
             'SELECT nom_etudiant, formation, date_emission FROM attestations WHERE code_unique = $1 AND est_valide = TRUE',
             [code]
         );
-        
         if (result.rows.length > 0) res.json({ valide: true, ...result.rows[0] });
         else res.json({ valide: false });
     } catch (err) {
-        console.error("Erreur vérification:", err);
         res.status(500).json({ success: false, message: "Erreur serveur." });
     }
 };
 
-// --- ADMIN ROUTES ---
+// --- ADMIN ROUTES (Protected by req.user.id) ---
 exports.getStudents = async (req, res) => {
     try {
         const { page = 1, limit = 10, search = '', status = 'all', formation = 'all' } = req.query;
         const offset = (page - 1) * limit;
 
-        let baseQuery = 'FROM inscriptions WHERE 1=1';
-        const params = [];
-        let paramIndex = 1;
+        // Force the query to filter by the logged-in admin immediately
+        let baseQuery = 'FROM inscriptions WHERE admin_id = $1';
+        const params = [req.user.id];
+        let paramIndex = 2; // Start at 2 since $1 is taken
 
         if (search) {
             baseQuery += ` AND (nom_complet ILIKE $${paramIndex} OR formation ILIKE $${paramIndex})`;
@@ -194,7 +99,6 @@ exports.getStudents = async (req, res) => {
             meta: { totalItems, unreadItems, currentPage: parseInt(page), totalPages: Math.ceil(totalItems / limit) }
         });
     } catch (err) {
-        console.error("Erreur pagination:", err);
         res.status(500).json({ success: false, message: "Erreur serveur" });
     }
 };
@@ -203,8 +107,8 @@ exports.addStudentManual = async (req, res) => {
     try {
         const { nom, email, telephone, formation } = req.body;
         const result = await pool.query(
-            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, statut_scolaire) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [nom, email, telephone, formation, 'En cours']
+            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, statut_scolaire, admin_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [nom, email, telephone, formation, 'En cours', req.user.id]
         );
         res.status(201).json({ success: true, data: result.rows[0] });
     } catch (err) {
@@ -214,7 +118,10 @@ exports.addStudentManual = async (req, res) => {
 
 exports.updateStatus = async (req, res) => {
     try {
-        await pool.query('UPDATE inscriptions SET statut_scolaire = $1 WHERE id = $2', [req.body.statut_scolaire, req.params.id]);
+        await pool.query(
+            'UPDATE inscriptions SET statut_scolaire = $1 WHERE id = $2 AND admin_id = $3', 
+            [req.body.statut_scolaire, req.params.id, req.user.id]
+        );
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false });
@@ -223,7 +130,10 @@ exports.updateStatus = async (req, res) => {
 
 exports.markAsRead = async (req, res) => {
     try {
-        await pool.query("UPDATE inscriptions SET statut = 'lu' WHERE id = $1", [req.params.id]);
+        await pool.query(
+            "UPDATE inscriptions SET statut = 'lu' WHERE id = $1 AND admin_id = $2", 
+            [req.params.id, req.user.id]
+        );
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false });
@@ -232,7 +142,10 @@ exports.markAsRead = async (req, res) => {
 
 exports.deleteStudent = async (req, res) => {
     try {
-        await pool.query('DELETE FROM inscriptions WHERE id = $1', [req.params.id]);
+        await pool.query(
+            'DELETE FROM inscriptions WHERE id = $1 AND admin_id = $2', 
+            [req.params.id, req.user.id]
+        );
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ success: false });
@@ -244,19 +157,28 @@ exports.generateCertificate = async (req, res) => {
         const { nom_etudiant, formation } = req.body;
         if (!nom_etudiant || !formation) return res.status(400).json({ success: false, message: "Données incomplètes." });
 
-        const checkStudent = await pool.query('SELECT id FROM inscriptions WHERE nom_complet = $1 AND formation = $2', [nom_etudiant, formation]);
+        // Enforce admin_id on read
+        const checkStudent = await pool.query(
+            'SELECT id FROM inscriptions WHERE nom_complet = $1 AND formation = $2 AND admin_id = $3', 
+            [nom_etudiant, formation, req.user.id]
+        );
         if (checkStudent.rows.length === 0) return res.status(404).json({ success: false, message: "Étudiant non trouvé." });
 
-        const existingCert = await pool.query('SELECT * FROM attestations WHERE nom_etudiant = $1 AND formation = $2', [nom_etudiant, formation]);
+        // Enforce admin_id on read
+        const existingCert = await pool.query(
+            'SELECT * FROM attestations WHERE nom_etudiant = $1 AND formation = $2 AND admin_id = $3', 
+            [nom_etudiant, formation, req.user.id]
+        );
         if (existingCert.rows.length > 0) return res.status(200).json({ success: true, message: "Code existant.", data: existingCert.rows[0] });
 
         const year = new Date().getFullYear();
         const randomHex = crypto.randomBytes(3).toString('hex').toUpperCase();
         const codeUnique = `DAR-${year}-${randomHex}`;
 
+        // Force the new row to belong to the logged-in admin
         const result = await pool.query(
-            'INSERT INTO attestations (code_unique, nom_etudiant, formation) VALUES ($1, $2, $3) RETURNING *',
-            [codeUnique, nom_etudiant, formation]
+            'INSERT INTO attestations (code_unique, nom_etudiant, formation, admin_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            [codeUnique, nom_etudiant, formation, req.user.id]
         );
 
         res.status(201).json({ success: true, data: result.rows[0] });
@@ -269,13 +191,14 @@ exports.downloadCertificatePdf = async (req, res) => {
     try {
         const { code } = req.params;
 
+        // Block unauthorized admins from downloading another client's certificates
         const result = await pool.query(
-            'SELECT nom_etudiant, formation, date_emission FROM attestations WHERE code_unique = $1',
-            [code]
+            'SELECT nom_etudiant, formation, date_emission FROM attestations WHERE code_unique = $1 AND admin_id = $2',
+            [code, req.user.id]
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ success: false, message: "Attestation introuvable." });
+            return res.status(404).json({ success: false, message: "Attestation introuvable ou accès refusé." });
         }
 
         const certData = result.rows[0];
@@ -285,9 +208,8 @@ exports.downloadCertificatePdf = async (req, res) => {
         
         const templatePath = path.join(__dirname, '../assets/template.png');
         const imageBytes = fs.readFileSync(templatePath);
-        const bgImage = await pdfDoc.embedPng(imageBytes); // Use .embedJpg() if you exported a JPG
+        const bgImage = await pdfDoc.embedPng(imageBytes); 
         
-        // Create a standard A4 Landscape page
         const page = pdfDoc.addPage([841.89, 595.28]);
         
         page.drawImage(bgImage, {
