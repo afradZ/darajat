@@ -16,8 +16,7 @@
         @media (max-width: 1024px) { .dashboard-split { grid-template-columns: 1fr; } }
         .admin-card { background: white; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); padding: 25px; }
         
-        .stat-banner { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 15px 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid var(--primary); }
-        .stat-banner.green { border-left-color: #1e293b; }
+        .stat-banner { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 15px 25px; border-radius: 8px; margin-bottom: 25px; border: none; }
         .stat-banner h2 { margin: 0; font-size: 1.2rem; color: #1e293b; display: flex; align-items: center; gap: 10px; }
         .banner-controls { display: flex; align-items: center; gap: 15px; }
         .search-input { padding: 8px 15px; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 0.9rem; outline: none; width: 200px; transition: 0.2s; }
@@ -125,7 +124,7 @@
 
         <div id="view-etudiants" class="hidden">
             <div class="admin-card">
-                <div class="stat-banner" style="border-left-color: #3b82f6;">
+                <div class="stat-banner">
                     <h2><i class="fa-solid fa-users"></i> Base de Données Étudiants</h2>
                     <div class="banner-controls">
                         <button onclick="openAjoutModal()" style="background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap;">

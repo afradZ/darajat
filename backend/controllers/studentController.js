@@ -112,6 +112,9 @@ exports.addStudentManual = async (req, res) => {
         );
         res.status(201).json({ success: true, data: result.rows[0] });
     } catch (err) {
+        if (err.code === '23505') {
+            return res.status(409).json({ success: false, message: "Ce numéro de téléphone est déjà inscrit." });
+        }
         res.status(500).json({ success: false, message: "Erreur serveur." });
     }
 };

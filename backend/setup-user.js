@@ -13,8 +13,8 @@ const pool = new Pool({
 });
 
 async function createAdmin() {
-    const username = 'darajat';
-    const plainTextPassword = 'admin123'; // Change before handing to client
+    const username = 'exampleadmin';
+    const plainTextPassword = 'password'; // Change before handing to client
 
     try {
         console.log("Tentative de connexion à Neon...");

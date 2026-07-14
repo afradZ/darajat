@@ -1,5 +1,3 @@
-// --- GLOBAL STATE & APP LOGIC ---
-
 let allMessages = [];
 let filteredMessages = [];
 let currentMsgPage = 1;
@@ -111,6 +109,43 @@ document.getElementById('login-form')?.addEventListener('submit', async (e) => {
         fetchDashboardData();
     } else {
         document.getElementById('login-error').style.display = 'block';
+    }
+});
+
+document.getElementById('form-ajout-etudiant')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Adjust these IDs if your HTML inputs are named differently
+    const payloadData = {
+        nom: document.getElementById('ajout-nom').value,
+        email: document.getElementById('ajout-email').value,
+        telephone: document.getElementById('ajout-telephone').value,
+        formation: document.getElementById('ajout-formation').value
+    };
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/etudiants`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            },
+            body: JSON.stringify(payloadData)
+        });
+
+        const data = await res.json();
+
+        // Catch the 409 (or any other failure) and show the exact message to the user
+        if (!data.success) {
+            alert(data.message || "Erreur lors de l'ajout.");
+            return; 
+        }
+
+        closeAjoutModal();
+        fetchInscriptions(); // Refresh the table to show the new student
+    } catch (err) {
+        console.error("Erreur réseau:", err);
+        alert("Erreur de connexion au serveur.");
     }
 });
 
