@@ -1,4 +1,3 @@
-// Example replacing your nodemailer logic
 const sendEmail = async (studentEmail, pdfAttachment) => {
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
@@ -12,9 +11,12 @@ const sendEmail = async (studentEmail, pdfAttachment) => {
             to: [{ email: studentEmail }],
             subject: "Confirmation d'inscription",
             textContent: "Votre inscription est confirmée. Voir le PDF ci-joint.",
-            
         })
     });
     
-    if (!response.ok) throw new Error('Failed to send HTTP email');
+    if (!response.ok) {
+        const errorData = await response.text(); 
+        console.error("Brevo API Rejection:", errorData);
+        throw new Error(`Brevo HTTP Error ${response.status}: ${errorData}`);
+    }
 };
