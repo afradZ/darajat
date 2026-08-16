@@ -53,6 +53,25 @@ function ouvrirModalInscription() {
     setTimeout(() => showOverlay('modal-inscription'), 300); 
 }
 
+function scrollCarousel(direction) {
+    const container = document.getElementById('formation-carousel');
+    const firstCard = container.querySelector('.carousel-card');
+    if (!firstCard) return;
+    
+    const cardWidth = firstCard.offsetWidth + 24; // Width + gap
+    container.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
+}
+
+function ouvrirInscriptionDirecte(formationName) {
+    const modal = document.getElementById('modal-inscription');
+    if (modal) modal.style.display = 'flex';
+    
+    const select = document.getElementById('formationSelect');
+    if (select) {
+        select.value = formationName;
+    }
+}
+
 // --- API CALLS ---
 async function soumettreInscription(event) {
     event.preventDefault(); 
