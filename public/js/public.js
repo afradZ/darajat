@@ -1,15 +1,3 @@
-const formationsData = {
-    edu: {
-        titre: "Formations éducatives",
-        points: ["Pédagogie moderne et appliquée", "Psychologie de l’enfant et de l'adolescent", "Méthodologies de soutien scolaire"]
-    },
-    pro: {
-        titre: "Formations professionnelles",
-        points: ["Développement Web & Ingénierie logicielle", "Marketing Digital & Stratégie", "Design Graphique & UI/UX"]
-    }
-};
-
-let categorieActuelle = "";
 
 // UTILS 
 const escapeHTML = (str) => str ? str.toString().replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]) : '';
@@ -32,43 +20,36 @@ const fermerModal = (modalId, event) => {
 };
 
 // --- UI INTERACTIONS ---
-function ouvrirModalDetails(type) {
-    categorieActuelle = type; 
-    document.getElementById('modal-title').innerText = formationsData[type].titre;
-    
-    document.getElementById('modal-list').innerHTML = formationsData[type].points
-        .map(point => `<li><i class="fa-solid fa-circle-check"></i> ${point}</li>`)
-        .join('');
-
-    showOverlay('modal-details');
-}
-
-function ouvrirModalInscription() {
-    hideOverlay('modal-details');
-    
-    const select = document.getElementById('formationSelect');
-    select.innerHTML = '<option value="" disabled selected>Choisir une formation spécifique...</option>' +
-        formationsData[categorieActuelle].points.map(p => `<option value="${p}">${p}</option>`).join('');
-
-    setTimeout(() => showOverlay('modal-inscription'), 300); 
-}
 
 function scrollCarousel(direction) {
     const container = document.getElementById('formation-carousel');
     const firstCard = container.querySelector('.carousel-card');
     if (!firstCard) return;
     
-    const cardWidth = firstCard.offsetWidth + 24; // Width + gap
-    container.scrollBy({ left: direction * cardWidth, behavior: 'smooth' });
-}
+    const cardWidth = firstCard.offsetWidth + 24; // Card width + gap
 
-function ouvrirInscriptionDirecte(formationName) {
-    const modal = document.getElementById('modal-inscription');
-    if (modal) modal.style.display = 'flex';
-    
-    const select = document.getElementById('formationSelect');
-    if (select) {
-        select.value = formationName;
+    if (direction === 1) { // Next (Right)
+        container.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        
+        // Wait for smooth scroll to finish, then move 1st card to the end invisibly
+        setTimeout(() => {
+            container.appendChild(container.firstElementChild);
+            container.style.scrollBehavior = 'auto'; // Turn off animation
+            container.scrollLeft -= cardWidth;       // Rewind instantly
+            container.style.scrollBehavior = 'smooth'; // Turn animation back on
+        }, 300); // 300ms matches standard browser smooth scroll duration
+        
+    } else { // Previous (Left)
+        // Move last card to the beginning instantly *before* scrolling
+        container.style.scrollBehavior = 'auto';
+        container.prepend(container.lastElementChild);
+        container.scrollLeft += cardWidth;
+        container.style.scrollBehavior = 'smooth';
+        
+        // Use requestAnimationFrame to let the browser process the DOM shift before animating
+        requestAnimationFrame(() => {
+            container.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
     }
 }
 

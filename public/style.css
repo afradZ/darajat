@@ -126,40 +126,176 @@ section { padding: 120px 5%; }
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
 }
 
-/* --- FORMATIONS (CARDS) --- */
-.cards {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 40px; max-width: 1100px; margin: auto;
+/* --- FORMATIONS CAROUSEL --- */
+.carousel-wrapper {
+    position: relative;
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 80px; /* 80px gutter for the arrows */
 }
 
-.card {
-    background: var(--white);
-    border-radius: 16px;
+.carousel-container {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 20px 0; /* 0px horizontal padding keeps cards perfectly centered */
+    scrollbar-width: none;
+    width: 100%;
+}
+
+.carousel-container::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-card {
+    flex: 0 0 calc(33.333% - 16px);
+    min-width: 300px;
+    scroll-snap-align: start;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-    transition: var(--transition);
-    border: 1px solid rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.card:hover { 
-    transform: translateY(-10px); 
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.1); 
+.carousel-card:hover {
+    transform: translateY(-4px);
+    border-color: #cbd5e1;
 }
 
-.card img { width: 100%; height: 220px; object-fit: cover; }
-
-.card-content { padding: 30px; display: flex; flex-direction: column; flex-grow: 1; }
-.card-icon {
-    width: 50px; height: 50px;
-    background: var(--bg-light); color: var(--secondary);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; margin-bottom: 20px;
+.card-img-wrapper {
+    width: 100%;
+    height: 190px;
+    background: #f1f5f9;
+    overflow: hidden;
 }
 
-.card h3 { color: var(--primary); margin-bottom: 12px; font-size: 1.4rem; }
-.card p { color: var(--text-light); margin-bottom: 25px; font-size: 1rem; flex-grow: 1; }
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.card-body {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+}
+
+.formation-badge {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    align-self: flex-start;
+}
+
+.card-body h3 {
+    font-size: 1.15rem;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+    line-height: 1.35;
+}
+
+.card-body p {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+    flex-grow: 1;
+}
+
+.download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--secondary);
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: var(--transition);
+}
+
+.download-link i {
+    font-size: 1rem;
+}
+
+.download-link:hover {
+    color: var(--secondary-hover);
+    text-decoration: underline;
+}
+
+.card-body .btn {
+    width: 100%;
+    margin-top: auto;
+}
+
+/* Floating Arrows */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%); /* Pins it exactly to the vertical middle */
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    cursor: pointer;
+    z-index: 10;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+    font-size: 1.1rem;
+}
+
+.carousel-btn:hover {
+    background: var(--secondary);
+    transform: translateY(-50%) scale(1.1); /* Keeps it centered while growing */
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+}
+
+/* Places arrows cleanly inside the 80px wrapper padding */
+.carousel-btn.left { left: 10px; }
+.carousel-btn.right { right: 10px; }
+
+@media (max-width: 900px) {
+    .carousel-wrapper { padding: 0 60px; }
+    .carousel-btn.left { left: 5px; }
+    .carousel-btn.right { right: 5px; }
+    
+    .carousel-card {
+        flex: 0 0 calc(50% - 12px);
+    }
+}
+
+@media (max-width: 600px) {
+    .carousel-wrapper { padding: 0 10px; }
+    .carousel-btn { display: none; }
+    
+    .carousel-card {
+        flex: 0 0 85%;
+        min-width: 260px;
+    }
+}
 
 /* --- BUTTONS --- */
 .btn {
