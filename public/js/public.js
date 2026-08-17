@@ -19,6 +19,16 @@ const fermerModal = (modalId, event) => {
     hideOverlay(modalId);
 };
 
+function ouvrirInscriptionDirecte(nomFormation) {
+    const selectElement = document.getElementById('formationSelect');
+    
+    if (selectElement) {
+        selectElement.value = nomFormation;
+    }
+    
+    showOverlay('modal-inscription');
+}
+
 // --- UI INTERACTIONS ---
 
 function scrollCarousel(direction) {
