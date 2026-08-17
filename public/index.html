@@ -45,30 +45,110 @@
 </section>
 
 <section id="formations" class="bg-gray">
-    <h2 class="section-title">Nos formations</h2>
-    <div class="cards">
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7" alt="Éducatives">
-            <div class="card-content">
-                <div class="card-icon"><i class="fa-solid fa-book-open-reader"></i></div>
-                <h3>Formations éducatives</h3>
-                <p>Développement cognitif, pédagogie moderne et accompagnement scolaire de haut niveau.</p>
-                <button class="btn" onclick="ouvrirModalDetails('edu')">
-                    Voir le programme <i class="fa-solid fa-arrow-right"></i>
-                </button>
+    <h2 class="section-title">Nos Formations</h2>
+    
+    <div class="carousel-wrapper">
+        <button class="carousel-btn left" onclick="scrollCarousel(-1)" aria-label="Précédent">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        
+        <div class="carousel-container" id="formation-carousel">
+            
+            <!-- 1. Aide Éducatrice -->
+            <div class="carousel-card">
+                <div class="card-img-wrapper">
+                    <img src="images/formation-aide-educatrice.jpeg" alt="Formation des Aides Éducatrices du Préscolaire">
+                </div>
+                <div class="card-body">
+                    <span class="formation-badge">Préscolaire</span>
+                    <h3>Aides Éducatrices en Préscolaire</h3>
+                    <p>Maîtrisez l'accompagnement quotidien, la sécurité et le développement de l'autonomie chez les tout-petits.</p>
+                    <a href="brochures/brochure-aide-éducatrice.pdf" download="Brochure_Aides_Educatrices.pdf" class="download-link">
+                        <i class="fa-regular fa-file-pdf"></i> En savoir plus (Brochure)
+                    </a>
+                    <button class="btn" onclick="ouvrirInscriptionDirecte('Formation des aides éducatrices en éducation préscolaire')">
+                        S'inscrire <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692" alt="Professionnelles">
-            <div class="card-content">
-                <div class="card-icon"><i class="fa-solid fa-laptop-code"></i></div>
-                <h3>Formations professionnelles</h3>
-                <p>Acquérez les compétences métiers modernes les plus demandées sur le marché du travail.</p>
-                <button class="btn" onclick="ouvrirModalDetails('pro')">
-                    Voir le programme <i class="fa-solid fa-arrow-right"></i>
-                </button>
+
+            <!-- 2. Éducatrice Préscolaire -->
+            <div class="carousel-card">
+                <div class="card-img-wrapper">
+                    <img src="images/formation-educatrice.jpeg" alt="Formation des Éducatrices du Préscolaire">
+                </div>
+                <div class="card-body">
+                    <span class="formation-badge">Enseignement</span>
+                    <h3>Éducatrices du Préscolaire</h3>
+                    <p>Conception d'activités pédagogiques adaptées, éveil cognitif et suivi personnalisé de l'enfant.</p>
+                    <a href="brochures/brochure-éducatrices-du-préscolaire.pdf" download="Brochure_Éducatrices_du_Préscolaire.pdf" class="download-link">
+                        <i class="fa-regular fa-file-pdf"></i> En savoir plus (Brochure)
+                    </a>
+                    <button class="btn" onclick="ouvrirInscriptionDirecte('Formation des éducatrices du préscolaire')">
+                        S'inscrire <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
+
+            <!-- 3. Formateurs en Préscolaire -->
+            <div class="carousel-card">
+                <div class="card-img-wrapper">
+                    <img src="images/formation-formateurs.jpeg" alt="Formation des Formateurs en Éducation Préscolaire">
+                </div>
+                <div class="card-body">
+                    <span class="formation-badge">Leadership</span>
+                    <h3>Formateurs en Éducation Préscolaire</h3>
+                    <p>Devenez un formateur inspirant : techniques d'animation d'adultes, ingénierie pédagogique et évaluation.</p>
+                    <a href="brochures/brochure-formateurs.pdf" download="Brochure_Formateurs.pdf" class="download-link">
+                        <i class="fa-regular fa-file-pdf"></i> En savoir plus (Brochure)
+                    </a>
+                    <button class="btn" onclick="ouvrirInscriptionDirecte('Formation des formateurs en éducation préscolaire')">
+                        S'inscrire <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. Autisme TSA -->
+            <div class="carousel-card">
+                <div class="card-img-wrapper">
+                    <img src="images/formation-autisme-tsa.jpeg" alt="Formation en Autisme TSA">
+                </div>
+                <div class="card-body">
+                    <span class="formation-badge">Spécialisation</span>
+                    <h3>Accompagnants en Autisme (TSA)</h3>
+                    <p>Stratégies d'accompagnement ciblées, outils visuels, gestion des comportements et inclusion active.</p>
+                    <a href="brochures/brochure-autisme-tsa.pdf" download="Brochure_Autisme_TSA.pdf" class="download-link">
+                        <i class="fa-regular fa-file-pdf"></i> En savoir plus (Brochure)
+                    </a>
+                    <button class="btn" onclick="ouvrirInscriptionDirecte('Formation en autisme TSA')">
+                        S'inscrire <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5. Pédagogie Montessori -->
+            <div class="carousel-card">
+                <div class="card-img-wrapper">
+                    <img src="images/formation-montessori.jpeg" alt="Formation en Pédagogie Montessori">
+                </div>
+                <div class="card-body">
+                    <span class="formation-badge">Méthode Active</span>
+                    <h3>Pédagogie Montessori</h3>
+                    <p>Mise en place d'un environnement préparé, manipulation de matériel sensoriel et éducation autonome.</p>
+                    <a href="brochures/brochure-montessori.pdf" download="Brochure_Montessori.pdf" class="download-link">
+                        <i class="fa-regular fa-file-pdf"></i> En savoir plus (Brochure)
+                    </a>
+                    <button class="btn" onclick="ouvrirInscriptionDirecte('Formation en pédagogie Montessori')">
+                        S'inscrire <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
         </div>
+
+        <button class="carousel-btn right" onclick="scrollCarousel(1)" aria-label="Suivant">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
     </div>
 </section>
 
@@ -115,17 +195,6 @@
     <p>© 2026 Centre Darajat. Tous droits réservés.</p>
 </footer>
 
-<div id="modal-details" class="modal-overlay" onclick="fermerModal('modal-details', event)">
-    <div class="modal" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="fermerModal('modal-details', event)"><i class="fa-solid fa-xmark"></i></span>
-        <div class="card-icon" style="margin: 0 auto 20px;"><i class="fa-solid fa-list-check"></i></div>
-        <h3 id="modal-title" style="color: var(--primary); font-size: 1.5rem;">Titre</h3>
-        <ul id="modal-list"></ul>
-        <button class="btn btn-green" style="width: 100%;" onclick="ouvrirModalInscription()">
-            <i class="fa-solid fa-user-plus"></i> S'inscrire maintenant
-        </button>
-    </div>
-</div>
 
 <div id="modal-inscription" class="modal-overlay" onclick="fermerModal('modal-inscription', event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -150,7 +219,12 @@
             <div class="input-group">
                 <i class="fa-solid fa-graduation-cap"></i>
                 <select id="formationSelect" required>
-                    <option value="" disabled selected>Choisir une formation spécifique...</option>
+                    <option value="" disabled selected>Choisir une formation...</option>
+                    <option value="Formation des aides éducatrices en éducation préscolaire">Formation des aides éducatrices en éducation préscolaire</option>
+                    <option value="Formation des éducatrices du préscolaire">Formation des éducatrices du préscolaire</option>
+                    <option value="Formation des formateurs en éducation préscolaire">Formation des formateurs en éducation préscolaire</option>
+                    <option value="Formation en autisme TSA">Formation en autisme TSA</option>
+                    <option value="Formation en pédagogie Montessori">Formation en pédagogie Montessori</option>
                 </select>
             </div>
             
