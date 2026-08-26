@@ -134,10 +134,13 @@ function renderInscriptions(dataChunk, meta) {
         <tr class="${isNew && isDashboard ? 'row-new' : ''}">
             ${dotHtml}
             <td>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px; flex-wrap: wrap;">
                     <b>${escapeHTML(etu.nom_complet)}</b>
                     <span style="font-family: monospace; background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" title="ID Étudiant">
                         #${etu.id}
+                    </span>
+                    <span style="font-family: monospace; background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" title="CIN">
+                        <i class="fa-regular fa-id-card"></i> ${escapeHTML(etu.cin || 'N/A')}
                     </span>
                 </div>
                 <small style="color:#64748b;">${escapeHTML(etu.email)}</small>
