@@ -75,7 +75,8 @@ async function soumettreInscription(event) {
         nom: document.querySelector('#modal-inscription input[type="text"]').value.trim(),
         email: document.querySelector('#modal-inscription input[type="email"]').value.trim(),
         telephone: finalTel,
-        formation
+        formation,
+        cin: document.getElementById('insc-cin').value.trim().toUpperCase()
     };
 
     try {

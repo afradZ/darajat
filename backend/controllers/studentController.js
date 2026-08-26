@@ -18,13 +18,13 @@ exports.registerPublic = async (req, res) => {
     try {
         // Fallback to admin ID 1 if the public frontend doesn't provide one
         const targetAdmin = req.body.admin_id || 2; 
-        const { nom, email, telephone, formation } = req.body;
+        const { nom, email, telephone, formation, cin } = req.body;
         
         console.log(`--- NOUVELLE INSCRIPTION ---`);
         
         const result = await pool.query(
-            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, admin_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [nom, email, telephone, formation, targetAdmin]
+            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, cin, admin_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [nom, email, telephone, formation, cin, targetAdmin]
         );
         
         res.status(201).json({ success: true, message: "Inscription réussie !", data: result.rows[0] });
@@ -105,10 +105,10 @@ exports.getStudents = async (req, res) => {
 
 exports.addStudentManual = async (req, res) => {
     try {
-        const { nom, email, telephone, formation } = req.body;
+        const { nom, email, telephone, formation, cin } = req.body;
         const result = await pool.query(
-            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, statut_scolaire, admin_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [nom, email, telephone, formation, 'En cours', req.user.id]
+            'INSERT INTO inscriptions (nom_complet, email, telephone, formation, cin, statut_scolaire, admin_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [nom, email, telephone, formation, cin, 'En cours', req.user.id]
         );
         res.status(201).json({ success: true, data: result.rows[0] });
     } catch (err) {

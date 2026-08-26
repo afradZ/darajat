@@ -22,6 +22,11 @@ const validateRegistration = [
     body('formation')
         .trim()
         .notEmpty().withMessage('La formation est requise.')
+        .escape(),
+    body('cin')
+        .trim()
+        .notEmpty().withMessage('Le CIN est requis.')
+        .isLength({ min: 4, max: 20 }).withMessage('Format CIN invalide.')
         .escape()
 ];
 

@@ -145,7 +145,8 @@ async function ajouterEtudiantManuel(e) {
         nom: document.getElementById('ajout-nom').value.trim(),
         email: document.getElementById('ajout-email').value.trim() || 'Non renseigné',
         telephone: finalTel, 
-        formation: document.getElementById('ajout-formation').value
+        formation: document.getElementById('ajout-formation').value,
+        cin: document.getElementById('ajout-cin').value.trim().toUpperCase()
     };
 
     try {

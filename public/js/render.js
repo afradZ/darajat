@@ -115,6 +115,8 @@ function renderInscriptions(dataChunk, meta) {
 
         const currentStatus = etu.statut_scolaire || 'En cours';
         const isNew = etu.statut !== 'lu';
+
+        const displayFormation = etu.formation.replace(/^Formation (des |en )?/i, '').trim();
         
         const safeName = etu.nom_complet.replace(/\\/g, '\\\\').replace(/['’]/g, "\\'").replace(/"/g, "&quot;").replace(/</g, "&lt;");
         const safeFormation = etu.formation.replace(/\\/g, '\\\\').replace(/['’]/g, "\\'").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -140,7 +142,7 @@ function renderInscriptions(dataChunk, meta) {
                 </div>
                 <small style="color:#64748b;">${escapeHTML(etu.email)}</small>
             </td>
-            ${isDashboard ? `<td><span class="badge">${escapeHTML(etu.formation)}</span></td>` : `<td><small style="color:#64748b;">${escapeHTML(etu.telephone)}</small></td><td>${escapeHTML(etu.formation)}</td>`}
+            ${isDashboard ? `<td><span class="badge">${escapeHTML(displayFormation)}</span></td>` : `<td><small style="color:#64748b;">${escapeHTML(etu.telephone)}</small></td><td>${escapeHTML(displayFormation)}</td>`}
             ${!isDashboard ? `
             <td>
                 <select onchange="updateStatutEtudiant('${etu.id}', this.value, this)" data-previous-value="${escapeHTML(currentStatus)}" style="padding:4px; border-radius:4px; border:1px solid; font-size:0.85rem; font-weight:600; cursor:pointer; outline:none; transition: all 0.2s ease; ${getStatusStyle(currentStatus)}">
